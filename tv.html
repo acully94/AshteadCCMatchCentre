@@ -2,34 +2,36 @@
 
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ashtead Match Centre</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ashtead Match Centre</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="tv-body">
+<body>
 
 <div class="screen">
 
   <header class="header">
 
 ```
-<div class="club">
-  <div class="club-logo">🏏</div>
+<div class="club-section">
+  <div class="crest">🏏</div>
 
   <div>
-    <div class="club-name">ASHTEAD</div>
-    <div class="club-sub">CRICKET CLUB</div>
+    <div class="club-title">ASHTEAD</div>
+    <div class="club-subtitle">CRICKET CLUB</div>
   </div>
 </div>
 
-<div class="title-block">
+<div class="page-title">
   <h1>SATURDAY MATCH CENTRE</h1>
-  <p>LIVE SCORES FROM AROUND THE CLUB</p>
+  <div class="subtitle">
+    LIVE SCORES FROM AROUND THE CLUB
+  </div>
 </div>
 
-<div class="clock-panel">
+<div class="datetime">
   <div id="date"></div>
   <div id="clock"></div>
 </div>
@@ -37,18 +39,27 @@
 
   </header>
 
-  <main>
+  <div class="content">
 
 ```
 <section class="featured">
 
-  <div class="live-badge">LIVE</div>
+  <div class="live-row">
 
-  <div class="featured-header">
-    <h2 id="featuredTitle"></h2>
+    <span class="live-pill">LIVE</span>
+
+    <span class="match-location">
+      1ST XI • HOME
+    </span>
+
   </div>
 
-  <div class="stream-placeholder">
+  <div class="featured-title">
+    <h2 id="featuredTitle">ASHSTEAD 1ST XI</h2>
+  </div>
+
+  <div class="stream-panel">
+
     <iframe
       id="youtubeFrame"
       width="100%"
@@ -56,59 +67,148 @@
       frameborder="0"
       allowfullscreen>
     </iframe>
+
   </div>
 
-  <div class="featured-score">
-    <span id="featuredScore"></span>
-  </div>
+  <div class="featured-score-area">
 
-  <div class="featured-overs" id="featuredOvers"></div>
+    <div>
+
+      <div
+        class="featured-score"
+        id="featuredScore">
+        184/4
+      </div>
+
+      <div
+        class="featured-overs"
+        id="featuredOvers">
+        34.2 OVERS
+      </div>
+
+    </div>
+
+  </div>
 
 </section>
 
-<aside class="right-column">
+<aside class="scorecards">
 
-  <div class="match-card">
-    <h3 id="secondTitle"></h3>
-    <div class="small-score" id="secondScore"></div>
-    <p id="secondStatus"></p>
+  <div class="scorecard">
+
+    <div class="card-title">
+      2ND XI • AWAY
+    </div>
+
+    <h3 id="secondTitle">
+      vs Reigate Priory
+    </h3>
+
+    <div
+      class="small-score"
+      id="secondScore">
+      145/6
+    </div>
+
+    <div
+      class="card-status"
+      id="secondStatus">
+      Need 62 from 72
+    </div>
+
   </div>
 
-  <div class="match-card">
-    <h3 id="thirdTitle"></h3>
-    <div class="small-score" id="thirdScore"></div>
-    <p id="thirdStatus"></p>
+  <div class="scorecard">
+
+    <div class="card-title">
+      3RD XI • HOME
+    </div>
+
+    <h3 id="thirdTitle">
+      vs Leatherhead
+    </h3>
+
+    <div
+      class="small-score"
+      id="thirdScore">
+      78/2
+    </div>
+
+    <div
+      class="card-status"
+      id="thirdStatus">
+      14 overs
+    </div>
+
   </div>
 
-  <div class="match-card">
-    <h3 id="fourthTitle"></h3>
-    <div class="small-score" id="fourthScore"></div>
-    <p id="fourthStatus"></p>
+  <div class="scorecard">
+
+    <div class="card-title">
+      4TH XI • AWAY
+    </div>
+
+    <h3 id="fourthTitle">
+      vs Epsom
+    </h3>
+
+    <div
+      class="small-score"
+      id="fourthScore">
+      32/1
+    </div>
+
+    <div
+      class="card-status"
+      id="fourthStatus">
+      Chasing 201
+    </div>
+
   </div>
 
 </aside>
 ```
 
-  </main>
+  </div>
 
-  <section class="bottom-panels">
+  <div class="bottom-row">
 
 ```
 <div class="sponsor-panel">
+
   <h2>SPONSOR MESSAGE</h2>
-  <p id="sponsorMessage"></p>
+
+  <p id="sponsorMessage">
+    Proudly supporting cricket in Ashtead
+  </p>
+
 </div>
 
 <div class="announcement-panel">
+
   <h2>CLUB ANNOUNCEMENT</h2>
-  <p id="clubAnnouncement"></p>
+
+  <p id="clubAnnouncement">
+    Junior awards evening Friday 7pm
+  </p>
+
 </div>
 ```
 
-  </section>
+  </div>
 
   <footer>
-    Live scores update every 30 seconds
+
+```
+<div>
+  Live scores update every 30 seconds
+</div>
+
+<div>
+  www.ashteadcc.co.uk
+</div>
+```
+
   </footer>
 
 </div>
