@@ -1,0 +1,43 @@
+{
+  "clubName": "Ashtead Cricket Club",
+
+  "featuredMatch": {
+    "team": "Ashtead 1st XI",
+    "opponent": "Opponent",
+    "score": "184/4",
+    "overs": "34.2",
+    "youtubeUrl": ""
+  },
+
+  "matches": [
+    {
+      "team": "2nd XI",
+      "opponent": "Reigate Priory",
+      "score": "145/6",
+      "status": "Need 62 from 72"
+    },
+    {
+      "team": "3rd XI",
+      "opponent": "Leatherhead",
+      "score": "78/2",
+      "status": "14 overs"
+    },
+    {
+      "team": "4th XI",
+      "opponent": "Epsom",
+      "score": "32/1",
+      "status": "Chasing 201"
+    }
+  ],
+
+  "announcements": [
+    "Bar open until 8pm",
+    "Junior training Tuesday",
+    "Awards Night Friday"
+  ],
+
+  "sponsors": [
+    "images/sponsors/sponsor1.png",
+    "images/sponsors/sponsor2.png"
+  ]
+}
