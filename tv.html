@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,207 +9,110 @@
 
 <body>
 
-<div class="screen">
+<div id="app" class="tv-container">
 
-  <header class="header">
+  <header class="top-bar">
 
-```
-<div class="club-section">
-  <div class="crest">🏏</div>
+    <div class="club-block">
+      <img src="images/crest.png" class="crest" alt="Ashtead CC">
+      <div>
+        <div class="club-name">ASHTEAD</div>
+        <div class="club-subtitle">CRICKET CLUB</div>
+      </div>
+    </div>
 
-  <div>
-    <div class="club-title">ASHTEAD</div>
-    <div class="club-subtitle">CRICKET CLUB</div>
-  </div>
-</div>
+    <div class="title-block">
+      <h1>SATURDAY MATCH CENTRE</h1>
+      <div class="subtitle">LIVE SCORES FROM AROUND THE CLUB</div>
+    </div>
 
-<div class="page-title">
-  <h1>SATURDAY MATCH CENTRE</h1>
-  <div class="subtitle">
-    LIVE SCORES FROM AROUND THE CLUB
-  </div>
-</div>
-
-<div class="datetime">
-  <div id="date"></div>
-  <div id="clock"></div>
-</div>
-```
+    <div class="clock-block">
+      <div id="date"></div>
+      <div id="clock"></div>
+    </div>
 
   </header>
 
-  <div class="content">
-  <section class="featured">
-  <aside class="scorecards">
+  <section class="main-content">
 
-```
-<section class="featured">
+    <section class="featured-match">
 
-  <div class="live-row">
-
-    <span class="live-pill">LIVE</span>
-
-    <span class="match-location">
-      1ST XI • HOME
-    </span>
-
-  </div>
-
-  <div class="featured-title">
-    <h2 id="featuredTitle">ASHSTEAD 1ST XI</h2>
-  </div>
-
-  <div class="stream-panel">
-
-    <iframe
-      id="youtubeFrame"
-      width="100%"
-      height="100%"
-      frameborder="0"
-      allowfullscreen>
-    </iframe>
-
-  </div>
-
-  <div class="featured-score-area">
-
-    <div>
-
-      <div
-        class="featured-score"
-        id="featuredScore">
-        184/4
+      <div class="live-banner">
+        LIVE
       </div>
 
-      <div
-        class="featured-overs"
-        id="featuredOvers">
-        34.2 OVERS
+      <h2 id="featuredTitle"></h2>
+
+      <div id="videoContainer" class="video-container">
+
+        <img
+          src="images/default-ground.jpeg"
+          class="ground-image"
+          id="groundImage"
+        >
+
+        <iframe
+          id="youtubeFrame"
+          class="youtube-frame"
+          allowfullscreen>
+        </iframe>
+
       </div>
 
+      <div class="featured-score-row">
+
+        <div>
+          <div id="featuredScore" class="featured-score"></div>
+          <div id="featuredOvers" class="featured-overs"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <aside class="side-panel">
+
+      <div class="match-card">
+        <div class="team-label">2ND XI</div>
+        <h3 id="match2Title"></h3>
+        <div id="match2Score" class="card-score"></div>
+        <div id="match2Status" class="card-status"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-label">3RD XI</div>
+        <h3 id="match3Title"></h3>
+        <div id="match3Score" class="card-score"></div>
+        <div id="match3Status" class="card-status"></div>
+      </div>
+
+      <div class="match-card">
+        <div class="team-label">4TH XI</div>
+        <h3 id="match4Title"></h3>
+        <div id="match4Score" class="card-score"></div>
+        <div id="match4Status" class="card-status"></div>
+      </div>
+
+    </aside>
+
+  </section>
+
+  <section class="bottom-row">
+
+    <div class="sponsor-box">
+      <h3>CLUB SPONSOR</h3>
+      <img id="sponsorImage" class="sponsor-image">
     </div>
 
-  </div>
-
-</section>
-
-<aside class="scorecards">
-
-  <div class="scorecard">
-
-    <div class="card-title">
-      2ND XI • AWAY
+    <div class="announcement-box">
+      <h3>CLUB NEWS</h3>
+      <div id="announcementText"></div>
     </div>
 
-    <h3 id="secondTitle">
-      vs Reigate Priory
-    </h3>
+  </section>
 
-    <div
-      class="small-score"
-      id="secondScore">
-      145/6
-    </div>
-
-    <div
-      class="card-status"
-      id="secondStatus">
-      Need 62 from 72
-    </div>
-
-  </div>
-
-  <div class="scorecard">
-
-    <div class="card-title">
-      3RD XI • HOME
-    </div>
-
-    <h3 id="thirdTitle">
-      vs Leatherhead
-    </h3>
-
-    <div
-      class="small-score"
-      id="thirdScore">
-      78/2
-    </div>
-
-    <div
-      class="card-status"
-      id="thirdStatus">
-      14 overs
-    </div>
-
-  </div>
-
-  <div class="scorecard">
-
-    <div class="card-title">
-      4TH XI • AWAY
-    </div>
-
-    <h3 id="fourthTitle">
-      vs Epsom
-    </h3>
-
-    <div
-      class="small-score"
-      id="fourthScore">
-      32/1
-    </div>
-
-    <div
-      class="card-status"
-      id="fourthStatus">
-      Chasing 201
-    </div>
-
-  </div>
-
-</aside>
-```
-
-  </div>
-
-  <div class="bottom-row">
-
-```
-<div class="sponsor-panel">
-
-  <h2>SPONSOR MESSAGE</h2>
-
-  <p id="sponsorMessage">
-    Proudly supporting cricket in Ashtead
-  </p>
-
-</div>
-
-<div class="announcement-panel">
-
-  <h2>CLUB ANNOUNCEMENT</h2>
-
-  <p id="clubAnnouncement">
-    Junior awards evening Friday 7pm
-  </p>
-
-</div>
-```
-
-  </div>
-
-  <footer>
-
-```
-<div>
-  Live scores update every 30 seconds
-</div>
-
-<div>
-  www.ashteadcc.co.uk
-</div>
-```
-
+  <footer class="footer-bar">
+    Ashtead CC Match Centre
   </footer>
 
 </div>
