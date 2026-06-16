@@ -1,49 +1,129 @@
-const config =
-  JSON.parse(
-    localStorage.getItem("matchCentreConfig")
-  ) || {};
+async function loadConfig() {
 
-featuredTitle.innerText =
-  `${config.featuredTeam || "Ashtead 1st XI"} vs ${config.featuredOpponent || "Opponent"}`;
+  const response =
+    await fetch("data/config.json");
 
-featuredScore.innerText =
-  config.featuredScore || "184/4";
+  const config =
+    await response.json();
 
-featuredOvers.innerText =
-  config.featuredOvers || "34.2 overs";
+  featuredTitle.textContent =
+    `${config.featuredMatch.team} vs ${config.featuredMatch.opponent}`;
 
-secondTitle.innerText = config.secondTitle || "";
-secondScore.innerText = config.secondScore || "";
-secondStatus.innerText = config.secondStatus || "";
+  featuredScore.textContent =
+    config.featuredMatch.score;
 
-thirdTitle.innerText = config.thirdTitle || "";
-thirdScore.innerText = config.thirdScore || "";
-thirdStatus.innerText = config.thirdStatus || "";
+  featuredOvers.textContent =
+    `${config.featuredMatch.overs} overs`;
 
-fourthTitle.innerText = config.fourthTitle || "";
-fourthScore.innerText = config.fourthScore || "";
-fourthStatus.innerText = config.fourthStatus || "";
+  match2Title.textContent =
+    config.matches[0].opponent;
 
-sponsorMessage.innerText =
-  config.sponsorMessage || "";
+  match2Score.textContent =
+    config.matches[0].score;
 
-clubAnnouncement.innerText =
-  config.clubAnnouncement || "";
+  match2Status.textContent =
+    config.matches[0].status;
 
-if(config.youtubeUrl){
-  youtubeFrame.src = config.youtubeUrl;
+  match3Title.textContent =
+    config.matches[1].opponent;
+
+  match3Score.textContent =
+    config.matches[1].score;
+
+  match3Status.textContent =
+    config.matches[1].status;
+
+  match4Title.textContent =
+    config.matches[2].opponent;
+
+  match4Score.textContent =
+    config.matches[2].score;
+
+  match4Status.textContent =
+    config.matches[2].status;
+
+  let announcementIndex = 0;
+
+  announcementText.textContent =
+    config.announcements[0];
+
+  setInterval(() => {
+
+    announcementIndex++;
+
+    if(
+      announcementIndex >=
+      config.announcements.length
+    ){
+      announcementIndex = 0;
+    }
+
+    announcementText.textContent =
+      config.announcements[
+        announcementIndex
+      ];
+
+  },10000);
+
+  if(
+    config.sponsors &&
+    config.sponsors.length
+  ){
+
+    let sponsorIndex = 0;
+
+    sponsorImage.src =
+      config.sponsors[0];
+
+    setInterval(() => {
+
+      sponsorIndex++;
+
+      if(
+        sponsorIndex >=
+        config.sponsors.length
+      ){
+        sponsorIndex = 0;
+      }
+
+      sponsorImage.src =
+        config.sponsors[sponsorIndex];
+
+    },15000);
+
+  }
+
+  if(
+    config.featuredMatch.youtubeUrl &&
+    config.featuredMatch.youtubeUrl.length
+  ){
+
+    groundImage.style.display =
+      "none";
+
+    youtubeFrame.style.display =
+      "block";
+
+    youtubeFrame.src =
+      config.featuredMatch.youtubeUrl;
+
+  }
+
 }
 
-function updateClock() {
+loadConfig();
+
+function updateClock(){
 
   const now = new Date();
 
-  date.innerText =
-    now.toLocaleDateString('en-GB');
+  date.textContent =
+    now.toLocaleDateString("en-GB");
 
-  clock.innerText =
-    now.toLocaleTimeString('en-GB');
+  clock.textContent =
+    now.toLocaleTimeString("en-GB");
 }
 
 updateClock();
+
 setInterval(updateClock,1000);
