@@ -10,45 +10,50 @@ font-family: Arial, Helvetica, sans-serif;
 }
 
 .screen {
-width: 100vw;
-height: 100vh;
 
-display: grid;
+  width: 1920px;
+  height: 1080px;
 
-grid-template-rows:
-90px
-1fr
-180px
-40px;
+  margin: 0 auto;
 
-gap: 8px;
+  display: grid;
 
-padding: 8px;
+  grid-template-areas:
+    "header header"
+    "featured scores"
+    "bottom bottom"
+    "footer footer";
 
-background:
-linear-gradient(
-180deg,
-#04160c,
-#021008
-);
+  grid-template-columns:
+    1300px
+    620px;
+
+  grid-template-rows:
+    90px
+    760px
+    180px
+    50px;
+
+  gap: 10px;
+
+  padding: 10px;
 }
 
 .header {
+  grid-area: header;
 
-display: grid;
+  display: grid;
 
-grid-template-columns:
-280px
-1fr
-180px;
+  grid-template-columns:
+    280px
+    1fr
+    180px;
 
-align-items: center;
+  align-items: center;
 
-background: #04120b;
+  padding: 0 20px;
 
-border: 1px solid #2b512f;
-
-padding: 0 20px;
+  border: 1px solid #315835;
 }
 
 .club-section {
@@ -104,16 +109,18 @@ gap: 8px;
 
 .featured {
 
-background:
-linear-gradient(
-135deg,
-#072214,
-#031109
-);
+  grid-area: featured;
 
-border: 1px solid #315835;
+  background:
+    linear-gradient(
+      135deg,
+      #072214,
+      #031109
+    );
 
-padding: 20px;
+  border: 1px solid #315835;
+
+  padding: 20px;
 }
 
 .live-pill {
@@ -172,14 +179,14 @@ font-size: 38px;
 
 .scorecards {
 
-display: grid;
+  grid-area: scores;
 
-grid-template-rows:
-1fr
-1fr
-1fr;
+  display: grid;
 
-gap: 8px;
+  grid-template-rows:
+    repeat(3, 1fr);
+
+  gap: 10px;
 }
 
 .scorecard {
@@ -220,13 +227,15 @@ color: #d4d4d4;
 
 .bottom-row {
 
-display: grid;
+  grid-area: bottom;
 
-grid-template-columns:
-60%
-40%;
+  display: grid;
 
-gap: 8px;
+  grid-template-columns:
+    60%
+    40%;
+
+  gap: 10px;
 }
 
 .sponsor-panel {
@@ -254,17 +263,13 @@ padding: 30px;
 
 footer {
 
-display: flex;
+  grid-area: footer;
 
-justify-content: space-between;
+  display: flex;
 
-align-items: center;
+  justify-content: space-between;
 
-padding: 0 20px;
+  align-items: center;
 
-background: #021108;
-
-color: #9be34f;
-
-font-size: 14px;
+  padding: 0 20px;
 }
