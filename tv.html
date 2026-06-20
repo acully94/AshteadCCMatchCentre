@@ -1,123 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ashtead Match Centre</title>
-<link rel="stylesheet" href="styles.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ashtead Match Centre</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 </head>
 
-<body>
+<body class="tv-body">
 
-<div id="app" class="tv-container">
+<div id="screen">
 
-  <header class="top-bar">
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
 
-    <div class="club-block">
-      <img src="images/crest.png" class="crest" alt="Ashtead CC">
-      <div>
-        <div class="club-name">ASHTEAD</div>
-        <div class="club-subtitle">CRICKET CLUB</div>
-      </div>
-    </div>
+    <header class="header">
 
-    <div class="title-block">
-      <h1>SATURDAY MATCH CENTRE</h1>
-      <div class="subtitle">LIVE SCORES FROM AROUND THE CLUB</div>
-    </div>
+        <div class="club-section">
 
-    <div class="clock-block">
-      <div id="date"></div>
-      <div id="clock"></div>
-    </div>
+            <img
+                src="images/crest.png"
+                class="club-crest"
+                alt="Ashtead CC">
 
-  </header>
+            <div>
 
-  <section class="main-content">
+                <div class="club-name">
+                    ASHTEAD
+                </div>
 
-    <section class="featured-match">
+                <div class="club-subtitle">
+                    CRICKET CLUB
+                </div>
 
-      <div class="live-banner">
-        LIVE
-      </div>
+            </div>
 
-      <h2 id="featuredTitle"></h2>
-
-      <div id="videoContainer" class="video-container">
-
-        <img
-          src="images/default-ground.jpeg"
-          class="ground-image"
-          id="groundImage"
-        >
-
-        <iframe
-          id="youtubeFrame"
-          class="youtube-frame"
-          allowfullscreen>
-        </iframe>
-
-      </div>
-
-      <div class="featured-score-row">
-
-        <div>
-          <div id="featuredScore" class="featured-score"></div>
-          <div id="featuredOvers" class="featured-overs"></div>
         </div>
 
-      </div>
+        <div class="title-section">
+
+            <h1>
+                SATURDAY MATCH CENTRE
+            </h1>
+
+            <div class="page-subtitle">
+                LIVE SCORES FROM AROUND THE CLUB
+            </div>
+
+        </div>
+
+        <div class="time-section">
+
+            <div id="date"></div>
+
+            <div id="clock"></div>
+
+        </div>
+
+    </header>
+
+    <!-- ===================================================== -->
+    <!-- MAIN -->
+    <!-- ===================================================== -->
+
+    <main class="main-grid">
+
+        <!-- ================= Featured ================= -->
+
+        <section class="featured-panel">
+
+            <div class="panel-header">
+
+                <div class="live-pill">
+                    LIVE
+                </div>
+
+                <div class="fixture-type">
+                    1ST XI • HOME
+                </div>
+
+            </div>
+
+            <div
+                class="fixture-title"
+                id="featuredTitle">
+            </div>
+
+            <div class="video-panel">
+
+                <img
+                    id="groundImage"
+                    class="ground-image"
+                    src="images/default-ground.jpeg"
+                    alt="Ground">
+
+                <iframe
+                    id="youtubeFrame"
+                    class="youtube-frame"
+                    allowfullscreen>
+                </iframe>
+
+            </div>
+
+            <div class="featured-footer">
+
+                <div class="featured-score-block">
+
+                    <div
+                        id="featuredScore"
+                        class="featured-score">
+                    </div>
+
+                    <div
+                        id="featuredOvers"
+                        class="featured-overs">
+                    </div>
+
+                </div>
+
+                <div class="featured-stats">
+
+                    <div class="stat-row">
+
+                        <span>Batter</span>
+
+                        <span id="batterOne">
+                            -
+                        </span>
+
+                    </div>
+
+                    <div class="stat-row">
+
+                        <span>Partner</span>
+
+                        <span id="batterTwo">
+                            -
+                        </span>
+
+                    </div>
+
+                    <div class="stat-row">
+
+                        <span>Bowler</span>
+
+                        <span id="bowler">
+                            -
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= Sidebar ================= -->
+
+        <aside class="sidebar">
+
+            <!-- 2nds -->
+
+            <div class="score-card">
+
+                <div class="card-top">
+
+                    <div class="team-heading">
+
+                        <div class="team-name">
+                            2ND XI
+                        </div>
+
+                        <div
+                            id="match2Title"
+                            class="opposition">
+                        </div>
+
+                    </div>
+
+                    <img
+                        id="match2Logo"
+                        class="team-logo"
+                        src="images/crest.png">
+
+                </div>
+
+                <div
+                    id="match2Score"
+                    class="card-score">
+                </div>
+
+                <div
+                    id="match2Status"
+                    class="card-status">
+                </div>
+
+            </div>
+
+            <!-- 3rds -->
+
+            <div class="score-card">
+
+                <div class="card-top">
+
+                    <div class="team-heading">
+
+                        <div class="team-name">
+                            3RD XI
+                        </div>
+
+                        <div
+                            id="match3Title"
+                            class="opposition">
+                        </div>
+
+                    </div>
+
+                    <img
+                        id="match3Logo"
+                        class="team-logo"
+                        src="images/crest.png">
+
+                </div>
+
+                <div
+                    id="match3Score"
+                    class="card-score">
+                </div>
+
+                <div
+                    id="match3Status"
+                    class="card-status">
+                </div>
+
+            </div>
+
+            <!-- 4ths -->
+
+            <div class="score-card">
+
+                <div class="card-top">
+
+                    <div class="team-heading">
+
+                        <div class="team-name">
+                            4TH XI
+                        </div>
+
+                        <div
+                            id="match4Title"
+                            class="opposition">
+                        </div>
+
+                    </div>
+
+                    <img
+                        id="match4Logo"
+                        class="team-logo"
+                        src="images/crest.png">
+
+                </div>
+
+                <div
+                    id="match4Score"
+                    class="card-score">
+                </div>
+
+                <div
+                    id="match4Status"
+                    class="card-status">
+                </div>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- ===================================================== -->
+    <!-- LOWER PANELS -->
+    <!-- ===================================================== -->
+
+    <section class="bottom-panels">
+
+        <div class="sponsor-panel">
+
+            <div class="panel-title">
+
+                CLUB PARTNERS
+
+            </div>
+
+            <img
+                id="sponsorImage"
+                class="sponsor-image">
+
+        </div>
+
+        <div class="news-panel">
+
+            <div class="panel-title">
+
+                CLUB NEWS
+
+            </div>
+
+            <div
+                id="announcementText"
+                class="announcement">
+            </div>
+
+        </div>
 
     </section>
 
-    <aside class="side-panel">
+    <!-- ===================================================== -->
+    <!-- FOOTER -->
+    <!-- ===================================================== -->
 
-      <div class="match-card">
-        <div class="team-label">2ND XI</div>
-        <h3 id="match2Title"></h3>
-        <div id="match2Score" class="card-score"></div>
-        <div id="match2Status" class="card-status"></div>
-      </div>
+    <footer class="footer">
 
-      <div class="match-card">
-        <div class="team-label">3RD XI</div>
-        <h3 id="match3Title"></h3>
-        <div id="match3Score" class="card-score"></div>
-        <div id="match3Status" class="card-status"></div>
-      </div>
+        <div>
+            ● LIVE
+        </div>
 
-      <div class="match-card">
-        <div class="team-label">4TH XI</div>
-        <h3 id="match4Title"></h3>
-        <div id="match4Score" class="card-score"></div>
-        <div id="match4Status" class="card-status"></div>
-      </div>
+        <div>
+            Scores refresh every 30 seconds
+        </div>
 
-    </aside>
+        <div>
+            www.ashteadcc.co.uk
+        </div>
 
-  </section>
-
-  <section class="bottom-row">
-
-    <div class="sponsor-box">
-      <h3>CLUB SPONSOR</h3>
-      <img id="sponsorImage" class="sponsor-image">
-    </div>
-
-    <div class="announcement-box">
-      <h3>CLUB NEWS</h3>
-      <div id="announcementText"></div>
-    </div>
-
-  </section>
-
-  <footer class="footer-bar">
-    Ashtead CC Match Centre
-  </footer>
+    </footer>
 
 </div>
 
 <script src="tv.js"></script>
 
 </body>
+
 </html>
