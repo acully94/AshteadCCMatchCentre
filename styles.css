@@ -1118,52 +1118,6 @@ TV Safe Area
 
 }
 
-/* ======================================================
-OPTIONAL DESKTOP SCALE
-Remove if using tv.js scaling
-====================================================== */
-
-@media (max-width:1920px){
-
-#screen{
-
-transform:scale(.90);
-
-transform-origin:top left;
-
-}
-
-}
-
-@media (max-width:1700px){
-
-#screen{
-
-transform:scale(.80);
-
-}
-
-}
-
-@media (max-width:1550px){
-
-#screen{
-
-transform:scale(.72);
-
-}
-
-}
-
-@media (max-width:1400px){
-
-#screen{
-
-transform:scale(.65);
-
-}
-
-}
 
 /* ======================================================
 END
