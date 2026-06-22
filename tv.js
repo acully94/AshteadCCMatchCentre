@@ -25,7 +25,38 @@ function scaleScreen() {
 
 window.addEventListener("resize", scaleScreen);
 window.addEventListener("load", scaleScreen);
+/* ============================================
+   AUTO SCALE 1920x1080 TV LAYOUT
+============================================ */
 
+function scaleScreen() {
+
+    const screen = document.getElementById("screen");
+
+    if (!screen) return;
+
+    const scale = Math.min(
+        window.innerWidth / 1920,
+        window.innerHeight / 1080
+    );
+
+    screen.style.transform = `scale(${scale})`;
+
+    screen.style.transformOrigin = "top left";
+
+    screen.style.position = "absolute";
+
+    screen.style.left =
+        ((window.innerWidth - (1920 * scale)) / 2) + "px";
+
+    screen.style.top =
+        ((window.innerHeight - (1080 * scale)) / 2) + "px";
+
+}
+
+window.addEventListener("resize", scaleScreen);
+
+window.addEventListener("load", scaleScreen);
 // ------------------------------------------------------
 // Clock
 // ------------------------------------------------------
@@ -211,3 +242,5 @@ function loadData(data) {
 // ------------------------------------------------------
 
 loadData(sampleData);
+
+scaleScreen();
