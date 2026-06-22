@@ -3,35 +3,35 @@
 
 <head>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Ashtead Match Centre</title>
+<title>Ashtead Match Centre</title>
 
-    <link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 
 </head>
 
-<body class="tv-body">
+<body>
 
 <div id="screen">
 
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
     <!-- HEADER -->
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
 
     <header class="header">
 
         <div class="club-section">
 
             <img
-                src="images/crest.png"
                 class="club-crest"
+                src="images/crest.png"
                 alt="Ashtead CC">
 
             <div>
@@ -50,9 +50,7 @@
 
         <div class="title-section">
 
-            <h1>
-                SATURDAY MATCH CENTRE
-            </h1>
+            <h1>SATURDAY MATCH CENTRE</h1>
 
             <div class="page-subtitle">
                 LIVE SCORES FROM AROUND THE CLUB
@@ -70,13 +68,13 @@
 
     </header>
 
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
     <!-- MAIN -->
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
 
     <main class="main-grid">
 
-        <!-- ================= Featured ================= -->
+        <!-- FEATURED MATCH -->
 
         <section class="featured-panel">
 
@@ -92,10 +90,10 @@
 
             </div>
 
-            <div
-                class="fixture-title"
-                id="featuredTitle">
-            </div>
+            <h2
+                id="featuredTitle"
+                class="fixture-title">
+            </h2>
 
             <div class="video-panel">
 
@@ -115,7 +113,7 @@
 
             <div class="featured-footer">
 
-                <div class="featured-score-block">
+                <div>
 
                     <div
                         id="featuredScore"
@@ -129,37 +127,15 @@
 
                 </div>
 
-                <div class="featured-stats">
+                <div class="batting-card">
 
-                    <div class="stat-row">
+                    <div id="batterOne"></div>
 
-                        <span>Batter</span>
+                    <div id="batterTwo"></div>
 
-                        <span id="batterOne">
-                            -
-                        </span>
+                    <br>
 
-                    </div>
-
-                    <div class="stat-row">
-
-                        <span>Partner</span>
-
-                        <span id="batterTwo">
-                            -
-                        </span>
-
-                    </div>
-
-                    <div class="stat-row">
-
-                        <span>Bowler</span>
-
-                        <span id="bowler">
-                            -
-                        </span>
-
-                    </div>
+                    <div id="bowler"></div>
 
                 </div>
 
@@ -167,17 +143,19 @@
 
         </section>
 
-        <!-- ================= Sidebar ================= -->
+        <!-- ===================================================== -->
+        <!-- SIDEBAR -->
+        <!-- ===================================================== -->
 
         <aside class="sidebar">
 
-            <!-- 2nds -->
+            <!-- 2nd XI -->
 
             <div class="score-card">
 
                 <div class="card-top">
 
-                    <div class="team-heading">
+                    <div>
 
                         <div class="team-name">
                             2ND XI
@@ -191,7 +169,7 @@
                     </div>
 
                     <img
-                        id="match2Logo"
+                        id="logo2"
                         class="team-logo"
                         src="images/crest.png">
 
@@ -209,13 +187,13 @@
 
             </div>
 
-            <!-- 3rds -->
+            <!-- 3rd XI -->
 
             <div class="score-card">
 
                 <div class="card-top">
 
-                    <div class="team-heading">
+                    <div>
 
                         <div class="team-name">
                             3RD XI
@@ -229,7 +207,7 @@
                     </div>
 
                     <img
-                        id="match3Logo"
+                        id="logo3"
                         class="team-logo"
                         src="images/crest.png">
 
@@ -247,13 +225,13 @@
 
             </div>
 
-            <!-- 4ths -->
+            <!-- 4th XI -->
 
             <div class="score-card">
 
                 <div class="card-top">
 
-                    <div class="team-heading">
+                    <div>
 
                         <div class="team-name">
                             4TH XI
@@ -267,7 +245,7 @@
                     </div>
 
                     <img
-                        id="match4Logo"
+                        id="logo4"
                         class="team-logo"
                         src="images/crest.png">
 
@@ -289,32 +267,28 @@
 
     </main>
 
-    <!-- ===================================================== -->
-    <!-- LOWER PANELS -->
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
+    <!-- BOTTOM -->
+    <!-- ========================================================= -->
 
     <section class="bottom-panels">
 
-        <div class="sponsor-panel">
+        <section class="sponsor-panel">
 
             <div class="panel-title">
-
-                CLUB PARTNERS
-
+                CLUB SPONSOR
             </div>
 
             <img
                 id="sponsorImage"
                 class="sponsor-image">
 
-        </div>
+        </section>
 
-        <div class="news-panel">
+        <section class="news-panel">
 
             <div class="panel-title">
-
                 CLUB NEWS
-
             </div>
 
             <div
@@ -322,22 +296,22 @@
                 class="announcement">
             </div>
 
-        </div>
+        </section>
 
     </section>
 
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
     <!-- FOOTER -->
-    <!-- ===================================================== -->
+    <!-- ========================================================= -->
 
     <footer class="footer">
 
         <div>
-            ● LIVE
+            🟢 LIVE SCORES UPDATE EVERY 30 SECONDS
         </div>
 
         <div>
-            Scores refresh every 30 seconds
+            PROUDLY SUPPORTING CRICKET AT ASHTEAD
         </div>
 
         <div>
