@@ -1,206 +1,825 @@
+/* ==========================================================
+   ASHTEAD MATCH CENTRE V4
+   PART 1 - FOUNDATION
+========================================================== */
+
+:root{
+
+    --bg:#071814;
+    --bg2:#0d241d;
+    --panel:#102a22;
+    --panel2:#14362b;
+
+    --green:#8ED34B;
+    --green-dark:#5EA62A;
+
+    --white:#ffffff;
+    --text:#e7efe8;
+    --muted:#b8c9bc;
+
+    --red:#d7263d;
+
+    --border:rgba(255,255,255,.08);
+
+    --shadow:
+        0 8px 30px rgba(0,0,0,.45);
+
+    --radius:18px;
+
+}
+
+/* ==========================================================
+RESET
+========================================================== */
+
 *{
-  box-sizing:border-box;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#03150d;
-  color:white;
+html,
+body{
+
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    background:var(--bg);
+
+    color:var(--white);
+
+    font-family:'Inter',sans-serif;
+
 }
 
-.tv-container{
-  width:100vw;
-  height:100vh;
+/* ==========================================================
+TV CANVAS
+========================================================== */
 
-  display:grid;
+body{
 
-  grid-template-rows:
-    90px
-    1fr
-    180px
-    35px;
+    display:flex;
 
-  gap:10px;
+    justify-content:center;
 
-  padding:10px;
+    align-items:center;
 
-  background:
-  linear-gradient(
-    180deg,
-    #03150d,
-    #071f14
-  );
 }
 
-.top-bar{
-  display:grid;
-  grid-template-columns:
-    280px
-    1fr
-    180px;
+/* Fixed 1920x1080 design */
 
-  align-items:center;
+#screen{
 
-  border:1px solid #315835;
-  padding:0 20px;
+    width:1920px;
+    height:1080px;
+
+    transform-origin:top left;
+
+    background:
+        radial-gradient(circle at top,#15382e,#071814 60%);
+
+    display:grid;
+
+    grid-template-columns:
+        1fr;
+
+    grid-template-rows:
+
+        110px
+        1fr
+        170px
+        42px;
+
+    gap:18px;
+
+    padding:22px;
+
 }
 
-.club-block{
-  display:flex;
-  gap:15px;
-  align-items:center;
+/* ==========================================================
+HEADER
+========================================================== */
+
+.header{
+
+    background:rgba(255,255,255,.04);
+
+    backdrop-filter:blur(8px);
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    display:grid;
+
+    grid-template-columns:
+
+        360px
+
+        1fr
+
+        260px;
+
+    align-items:center;
+
+    padding:0 28px;
+
+    box-shadow:var(--shadow);
+
 }
 
-.crest{
-  width:70px;
-  height:70px;
-  object-fit:contain;
+/* ---------------------------------------------------------- */
+
+.club-section{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+.club-crest{
+
+    width:86px;
+    height:86px;
+
+    object-fit:contain;
+
+    border-radius:50%;
+
+    background:white;
+
+    padding:4px;
+
 }
 
 .club-name{
-  font-size:32px;
-  font-weight:bold;
+
+    font-family:'Oswald',sans-serif;
+
+    font-size:42px;
+
+    letter-spacing:1px;
+
+    line-height:1;
+
 }
 
 .club-subtitle{
-  color:#8ddc4d;
+
+    color:var(--green);
+
+    font-size:20px;
+
+    letter-spacing:2px;
+
+    margin-top:8px;
+
 }
 
-.title-block{
-  text-align:center;
+/* ---------------------------------------------------------- */
+
+.title-section{
+
+    text-align:center;
+
 }
 
-.title-block h1{
-  margin:0;
-  font-size:48px;
+.title-section h1{
+
+    font-family:'Oswald',sans-serif;
+
+    font-size:62px;
+
+    letter-spacing:3px;
+
+    line-height:1;
+
 }
 
-.subtitle{
-  color:#8ddc4d;
+.page-subtitle{
+
+    margin-top:10px;
+
+    color:var(--green);
+
+    letter-spacing:4px;
+
+    font-size:20px;
+
 }
 
-.clock-block{
-  text-align:right;
+/* ---------------------------------------------------------- */
+
+.time-section{
+
+    text-align:right;
+
 }
 
-.main-content{
-  display:grid;
-  grid-template-columns:65% 35%;
-  gap:10px;
+#clock{
+
+    font-size:46px;
+
+    font-weight:700;
+
 }
 
-.featured-match{
-  border:1px solid #315835;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
+#date{
+
+    color:var(--green);
+
+    font-size:22px;
+
+    margin-bottom:8px;
+
 }
 
-.live-banner{
-  background:#d61e1e;
-  padding:8px 16px;
-  width:90px;
-  text-align:center;
-  border-radius:6px;
-  font-weight:bold;
+/* ==========================================================
+MAIN GRID
+========================================================== */
+
+.main-grid{
+
+    display:grid;
+
+    grid-template-columns:
+
+        1.9fr
+
+        .9fr;
+
+    gap:18px;
+
 }
 
-.featured-match h2{
-  font-size:42px;
-  margin:20px 0;
+/* ==========================================================
+FEATURED MATCH PANEL
+========================================================== */
+
+.featured-panel{
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    padding:24px;
+
+    display:flex;
+
+    flex-direction:column;
+
 }
 
-.video-container{
-  flex:1;
-  position:relative;
-  overflow:hidden;
-  border:1px solid #315835;
+/* top row */
+
+.panel-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+.live-pill{
+
+    background:var(--red);
+
+    color:white;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+    border-radius:8px;
+
+    padding:
+
+        10px
+        20px;
+
+    animation:pulse 2s infinite;
+
+}
+
+.fixture-type{
+
+    color:var(--green);
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+/* title */
+
+.fixture-title{
+
+    margin-top:18px;
+
+    font-size:44px;
+
+    font-weight:800;
+
+}
+
+/* ==========================================================
+VIDEO
+========================================================== */
+
+.video-panel{
+
+    flex:1;
+
+    margin-top:20px;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+    position:relative;
+
+    background:black;
+
 }
 
 .ground-image,
 .youtube-frame{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  border:0;
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    border:0;
+
 }
 
 .youtube-frame{
-  display:none;
+
+    display:none;
+
 }
 
-.featured-score-row{
-  display:flex;
-  justify-content:flex-end;
-  margin-top:20px;
+/* ==========================================================
+FEATURED SCORE
+========================================================== */
+
+.featured-footer{
+
+    margin-top:24px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-end;
+
 }
 
 .featured-score{
-  font-size:96px;
-  font-weight:bold;
+
+    font-size:120px;
+
+    font-weight:800;
+
+    line-height:1;
+
 }
 
 .featured-overs{
-  color:#8ddc4d;
-  font-size:28px;
+
+    color:var(--green);
+
+    font-size:34px;
+
+    margin-top:8px;
+
+}
+/* ==========================================================
+   PART 2 - SIDEBAR / LOWER PANELS / FOOTER
+========================================================== */
+
+
+/* ==========================================================
+SIDEBAR
+========================================================== */
+
+.sidebar{
+
+    display:grid;
+
+    grid-template-rows:
+        repeat(3,1fr);
+
+    gap:18px;
+
 }
 
-.side-panel{
-  display:grid;
-  grid-template-rows:1fr 1fr 1fr;
-  gap:10px;
+
+/* ==========================================================
+SCORE CARDS
+========================================================== */
+
+.score-card{
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    padding:22px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:space-between;
+
+    box-shadow:var(--shadow);
+
+    transition:.25s;
+
 }
 
-.match-card{
-  border:1px solid #315835;
-  padding:20px;
+.score-card:hover{
+
+    transform:translateY(-2px);
+
 }
 
-.team-label{
-  color:#8ddc4d;
-  font-weight:bold;
+
+.card-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
 }
+
+
+.team-heading{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+.team-name{
+
+    font-family:'Oswald',sans-serif;
+
+    font-size:32px;
+
+    color:var(--green);
+
+    letter-spacing:2px;
+
+}
+
+
+.opposition{
+
+    margin-top:6px;
+
+    font-size:24px;
+
+    font-weight:600;
+
+    color:white;
+
+}
+
+
+.team-logo{
+
+    width:64px;
+    height:64px;
+
+    object-fit:contain;
+
+    border-radius:50%;
+
+    background:white;
+
+    padding:4px;
+
+}
+
 
 .card-score{
-  font-size:64px;
-  font-weight:bold;
+
+    margin-top:24px;
+
+    font-size:72px;
+
+    font-weight:800;
+
+    line-height:1;
+
 }
+
 
 .card-status{
-  color:#d5d5d5;
+
+    margin-top:12px;
+
+    color:var(--muted);
+
+    font-size:22px;
+
 }
 
-.bottom-row{
-  display:grid;
-  grid-template-columns:40% 60%;
-  gap:10px;
+
+/* ==========================================================
+BOTTOM PANELS
+========================================================== */
+
+.bottom-panels{
+
+    display:grid;
+
+    grid-template-columns:
+
+        420px
+
+        1fr;
+
+    gap:18px;
+
 }
 
-.sponsor-box{
-  background:#1497e8;
-  padding:20px;
+
+/* ==========================================================
+SPONSORS
+========================================================== */
+
+.sponsor-panel{
+
+    background:linear-gradient(
+        135deg,
+        #0b8cd8,
+        #0d6bb0
+    );
+
+    border-radius:var(--radius);
+
+    padding:24px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    box-shadow:var(--shadow);
+
 }
+
+
+.panel-title{
+
+    font-family:'Oswald',sans-serif;
+
+    letter-spacing:2px;
+
+    font-size:28px;
+
+    margin-bottom:18px;
+
+}
+
 
 .sponsor-image{
-  max-width:100%;
-  max-height:100px;
-  margin-top:10px;
+
+    max-width:90%;
+
+    max-height:90px;
+
+    object-fit:contain;
+
 }
 
-.announcement-box{
-  border:1px solid #315835;
-  padding:20px;
+
+/* ==========================================================
+NEWS
+========================================================== */
+
+.news-panel{
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid var(--border);
+
+    border-radius:var(--radius);
+
+    padding:28px;
+
+    box-shadow:var(--shadow);
+
+    display:flex;
+
+    flex-direction:column;
+
 }
 
-.footer-bar{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#8ddc4d;
-  border-top:1px solid #315835;
+
+.announcement{
+
+    margin-top:18px;
+
+    font-size:28px;
+
+    line-height:1.45;
+
+    color:var(--text);
+
+}
+
+
+/* ==========================================================
+FOOTER
+========================================================== */
+
+.footer{
+
+    border-radius:12px;
+
+    background:rgba(255,255,255,.05);
+
+    border:1px solid var(--border);
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 24px;
+
+    color:var(--green);
+
+    font-size:18px;
+
+    letter-spacing:1px;
+
+}
+
+
+/* ==========================================================
+LIVE ANIMATION
+========================================================== */
+
+@keyframes pulse{
+
+    0%{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        opacity:.65;
+
+        transform:scale(.96);
+
+    }
+
+    100%{
+
+        opacity:1;
+
+        transform:scale(1);
+
+    }
+
+}
+
+
+/* ==========================================================
+AUTO SCALE
+This makes the 1920x1080 canvas fit ANY screen.
+========================================================== */
+
+body{
+
+    overflow:hidden;
+
+}
+
+
+/*
+The scale is set by tv.js.
+
+Example:
+
+const scale = Math.min(
+window.innerWidth/1920,
+window.innerHeight/1080);
+
+screen.style.transform=`scale(${scale})`;
+
+*/
+
+
+/* ==========================================================
+SMALL VISUAL DETAILS
+========================================================== */
+
+.featured-panel,
+.score-card,
+.news-panel,
+.header{
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+
+.featured-panel::before,
+.score-card::before,
+.news-panel::before,
+.header::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+
+    left:0;
+
+    right:0;
+
+    height:3px;
+
+    background:linear-gradient(
+        90deg,
+        transparent,
+        var(--green),
+        transparent
+    );
+
+    opacity:.45;
+
+}
+
+
+.video-panel img{
+
+    transition:transform .5s;
+
+}
+
+
+.video-panel:hover img{
+
+    transform:scale(1.02);
+
+}
+
+
+.card-score,
+.featured-score{
+
+    text-shadow:
+        0 0 15px rgba(142,211,75,.15);
+
+}
+
+
+.team-name{
+
+    text-transform:uppercase;
+
+}
+
+
+.footer div{
+
+    white-space:nowrap;
+
 }
