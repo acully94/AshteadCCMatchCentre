@@ -36,9 +36,10 @@ function scaleScreen() {
     if (!screen) return;
 
     const scale = Math.min(
-        window.innerWidth / 1920,
-        window.innerHeight / 1080
-    );
+    1,
+    window.innerWidth / 1920,
+    window.innerHeight / 1080
+);
 
     screen.style.transform = `scale(${scale})`;
 
