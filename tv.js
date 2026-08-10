@@ -71,7 +71,8 @@ const CLUB_NAME_MATCH = "ashtead";
 const REFRESH_INTERVAL_MS = 30000;
 const PLAY_CRICKET_MATCH_DETAIL_URL = "https://play-cricket.com/api/v2/match_detail.json";
 
-const CARD_SLOTS = ["second", "third", "fourth"];
+const SLOT_IDS = ["slot1", "slot2", "slot3", "slot4"];
+const SIDE_CARD_KEYS = ["second", "third", "fourth"];
 
 function getConfig() {
 
@@ -91,6 +92,82 @@ function getConfig() {
 
 }
 
+// ------------------------------------------------------
+// Default data
+// (used until admin.html config and/or Play-Cricket data override it)
+// ------------------------------------------------------
+
+const sampleData = {
+
+    featuredSlotId: "slot1",
+
+    featuredIsLiveStream: false,
+
+    featuredYoutubeUrl: "",
+
+    slots: {
+
+        slot1: {
+            teamName: "1st XI",
+            fixtureType: "1ST XI • HOME",
+            opponent: "Reigate Priory",
+            score: "184 / 4",
+            overs: "34.2 overs",
+            status: "",
+            batterOne: "J Smith 82*",
+            batterTwo: "T Brown 36*",
+            bowler: "A Jones 7-0-42-1"
+        },
+
+        slot2: {
+            teamName: "2nd XI",
+            fixtureType: "",
+            opponent: "Banstead",
+            score: "147 / 5",
+            overs: "",
+            status: "Need 88 from 96 balls",
+            batterOne: "",
+            batterTwo: "",
+            bowler: ""
+        },
+
+        slot3: {
+            teamName: "3rd XI",
+            fixtureType: "",
+            opponent: "Leatherhead",
+            score: "212 all out",
+            overs: "",
+            status: "Leatherhead 58/2",
+            batterOne: "",
+            batterTwo: "",
+            bowler: ""
+        },
+
+        slot4: {
+            teamName: "4th XI",
+            fixtureType: "",
+            opponent: "Old Rutlishians",
+            score: "Rain Delay",
+            overs: "",
+            status: "Restart 15:20",
+            batterOne: "",
+            batterTwo: "",
+            bowler: ""
+        }
+
+    },
+
+    announcements: [
+        "Welcome to Ashtead Cricket Club",
+        "Bar open all day",
+        "BBQ from 12:30",
+        "Junior training Sunday 9:30"
+    ],
+
+    sponsorImages: []
+
+};
+
 // Layer the admin-entered manual fields on top of the built-in sample
 // data. These are the fields shown until (or unless) a Play-Cricket Match
 // ID is configured and a live fetch succeeds for that fixture.
@@ -101,35 +178,38 @@ function buildDataFromConfig(config) {
 
     if (!config) return data;
 
-    const featured = config.featured || {};
+    if (config.featuredSlotId) data.featuredSlotId = config.featuredSlotId;
 
-    if (featured.fixtureType) data.featured.fixtureType = featured.fixtureType;
+    data.featuredIsLiveStream = !!config.featuredIsLiveStream;
+    if (config.featuredYoutubeUrl) data.featuredYoutubeUrl = config.featuredYoutubeUrl;
 
-    if (featured.team && featured.opponent) {
-        data.featured.title = `${featured.team} v ${featured.opponent}`;
-    }
+    SLOT_IDS.forEach((slotId) => {
 
-    if (featured.score) data.featured.score = featured.score;
-    if (featured.overs) data.featured.overs = featured.overs;
-    if (featured.batterOne) data.featured.batterOne = featured.batterOne;
-    if (featured.batterTwo) data.featured.batterTwo = featured.batterTwo;
-    if (featured.bowler) data.featured.bowler = featured.bowler;
-    if (featured.youtubeUrl) data.featured.youtube = featured.youtubeUrl;
-
-    CARD_SLOTS.forEach((slotKey) => {
-
-        const slot = config[slotKey];
+        const slot = config.slots && config.slots[slotId];
 
         if (!slot) return;
 
-        if (slot.title) data[slotKey].title = slot.title;
-        if (slot.score) data[slotKey].score = slot.score;
-        if (slot.status) data[slotKey].status = slot.status;
+        const target = data.slots[slotId];
+
+        if (slot.teamName) target.teamName = slot.teamName;
+        if (slot.fixtureType) target.fixtureType = slot.fixtureType;
+        if (slot.opponent) target.opponent = slot.opponent;
+        if (slot.score) target.score = slot.score;
+        if (slot.overs) target.overs = slot.overs;
+        if (slot.status) target.status = slot.status;
+        if (slot.batterOne) target.batterOne = slot.batterOne;
+        if (slot.batterTwo) target.batterTwo = slot.batterTwo;
+        if (slot.bowler) target.bowler = slot.bowler;
 
     });
 
-    if (config.sponsorImage) data.sponsorImage = config.sponsorImage;
-    if (config.announcement) data.announcement = config.announcement;
+    if (Array.isArray(config.announcements) && config.announcements.length > 0) {
+        data.announcements = config.announcements;
+    }
+
+    if (Array.isArray(config.sponsorImages)) {
+        data.sponsorImages = config.sponsorImages;
+    }
 
     return data;
 
@@ -225,39 +305,40 @@ function currentBowlerLine(innings) {
 
 }
 
-function applyFeaturedLiveData(data, match) {
+// Applies live data to a slot. `detailed` also fills batting/bowling —
+// used for whichever slot is currently featured.
 
-    const innings = latestInnings(match);
-
-    if (!innings) return;
-
-    data.featured.score = formatScoreLine(innings);
-
-    if (innings.overs) data.featured.overs = `${innings.overs} overs`;
-
-    const batters = notOutBatters(innings);
-
-    if (batters[0]) data.featured.batterOne = batters[0];
-    if (batters[1]) data.featured.batterTwo = batters[1];
-
-    const bowler = currentBowlerLine(innings);
-
-    if (bowler) data.featured.bowler = bowler;
-
-}
-
-function applyCardLiveData(data, slotKey, match) {
+function applySlotLiveData(slot, match, detailed) {
 
     const homeIsUs = isOurClub(match.home_club_name);
     const oppositionName = homeIsUs ? match.away_club_name : match.home_club_name;
 
-    if (oppositionName) data[slotKey].title = `v ${oppositionName}`;
+    if (oppositionName) slot.opponent = oppositionName;
 
     const innings = latestInnings(match);
 
-    if (innings) data[slotKey].score = formatScoreLine(innings);
+    if (innings) {
 
-    if (match.status) data[slotKey].status = match.status;
+        slot.score = formatScoreLine(innings);
+
+        if (detailed) {
+
+            if (innings.overs) slot.overs = `${innings.overs} overs`;
+
+            const batters = notOutBatters(innings);
+
+            if (batters[0]) slot.batterOne = batters[0];
+            if (batters[1]) slot.batterTwo = batters[1];
+
+            const bowler = currentBowlerLine(innings);
+
+            if (bowler) slot.bowler = bowler;
+
+        }
+
+    }
+
+    if (match.status) slot.status = match.status;
 
 }
 
@@ -270,26 +351,18 @@ async function refreshLiveScores(config, data) {
     const siteId = config.playCricket.siteId;
     const jobs = [];
 
-    if (config.featured && config.featured.matchId) {
+    SLOT_IDS.forEach((slotId) => {
+
+        const configSlot = config.slots && config.slots[slotId];
+
+        if (!configSlot || !configSlot.matchId) return;
+
+        const isFeatured = slotId === data.featuredSlotId;
 
         jobs.push(
-            fetchPlayCricketMatch(config.featured.matchId, apiToken, siteId)
-                .then((match) => applyFeaturedLiveData(data, match))
-                .catch((err) => console.warn("[PlayCricket] featured match fetch failed:", err.message))
-        );
-
-    }
-
-    CARD_SLOTS.forEach((slotKey) => {
-
-        const slot = config[slotKey];
-
-        if (!slot || !slot.matchId) return;
-
-        jobs.push(
-            fetchPlayCricketMatch(slot.matchId, apiToken, siteId)
-                .then((match) => applyCardLiveData(data, slotKey, match))
-                .catch((err) => console.warn(`[PlayCricket] ${slotKey} match fetch failed:`, err.message))
+            fetchPlayCricketMatch(configSlot.matchId, apiToken, siteId)
+                .then((match) => applySlotLiveData(data.slots[slotId], match, isFeatured))
+                .catch((err) => console.warn(`[PlayCricket] ${slotId} match fetch failed:`, err.message))
         );
 
     });
@@ -301,154 +374,40 @@ async function refreshLiveScores(config, data) {
 }
 
 // ------------------------------------------------------
-// Default data
-// (used until admin.html config and/or Play-Cricket data override it)
-// ------------------------------------------------------
-
-const sampleData = {
-
-    featured: {
-
-        fixtureType: "1ST XI • HOME",
-
-        title: "Ashtead 1st XI v Reigate Priory",
-
-        score: "184 / 4",
-
-        overs: "34.2 overs",
-
-        batterOne: "J Smith 82*",
-
-        batterTwo: "T Brown 36*",
-
-        bowler: "A Jones 7-0-42-1",
-
-        youtube: ""
-
-    },
-
-    second: {
-
-        title: "v Banstead",
-
-        score: "147 / 5",
-
-        status: "Need 88 from 96 balls"
-
-    },
-
-    third: {
-
-        title: "v Leatherhead",
-
-        score: "212 all out",
-
-        status: "Leatherhead 58/2"
-
-    },
-
-    fourth: {
-
-        title: "v Old Rutlishians",
-
-        score: "Rain Delay",
-
-        status: "Restart 15:20"
-
-    },
-
-    sponsorImage: "",
-
-    announcement:
-        "Welcome to Ashtead Cricket Club. Bar open all day. BBQ from 12:30. Junior training Sunday 9:30."
-
-};
-
-// ------------------------------------------------------
 // Populate screen
 // ------------------------------------------------------
 
 function loadData(data) {
 
-    document.getElementById("fixtureType").textContent =
-        data.featured.fixtureType;
+    const featured = data.slots[data.featuredSlotId] || data.slots.slot1;
+
+    document.getElementById("fixtureType").textContent = featured.fixtureType;
 
     document.getElementById("featuredTitle").textContent =
-        data.featured.title;
+        featured.opponent ? `${featured.teamName} v ${featured.opponent}` : featured.teamName;
 
-    document.getElementById("featuredScore").textContent =
-        data.featured.score;
+    document.getElementById("featuredScore").textContent = featured.score;
 
-    document.getElementById("featuredOvers").textContent =
-        data.featured.overs;
+    document.getElementById("featuredOvers").textContent = featured.overs;
 
-    document.getElementById("batterOne").textContent =
-        data.featured.batterOne;
+    document.getElementById("batterOne").textContent = featured.batterOne;
 
-    document.getElementById("batterTwo").textContent =
-        data.featured.batterTwo;
+    document.getElementById("batterTwo").textContent = featured.batterTwo;
 
-    document.getElementById("bowler").textContent =
-        data.featured.bowler;
+    document.getElementById("bowler").textContent = featured.bowler;
 
-    // Sidebar
+    // Live stream mode: the stream itself (e.g. Frogbox overlay) shows the
+    // score, so hide our own score/batting overlay and just show the video.
 
-    document.getElementById("match2Title").textContent =
-        data.second.title;
-
-    document.getElementById("match2Score").textContent =
-        data.second.score;
-
-    document.getElementById("match2Status").textContent =
-        data.second.status;
-
-    document.getElementById("match3Title").textContent =
-        data.third.title;
-
-    document.getElementById("match3Score").textContent =
-        data.third.score;
-
-    document.getElementById("match3Status").textContent =
-        data.third.status;
-
-    document.getElementById("match4Title").textContent =
-        data.fourth.title;
-
-    document.getElementById("match4Score").textContent =
-        data.fourth.score;
-
-    document.getElementById("match4Status").textContent =
-        data.fourth.status;
-
-    // Announcement
-
-    document.getElementById("announcementText").textContent =
-        data.announcement;
-
-    // Sponsor
-
-    const sponsor = document.getElementById("sponsorImage");
-
-    if (data.sponsorImage !== "") {
-
-        sponsor.src = data.sponsorImage;
-        sponsor.style.display = "block";
-
-    } else {
-
-        sponsor.style.display = "none";
-
-    }
-
-    // YouTube
-
+    const featuredFooter = document.querySelector(".featured-footer");
     const iframe = document.getElementById("youtubeFrame");
     const ground = document.getElementById("groundImage");
 
-    if (data.featured.youtube !== "") {
+    const showStream = data.featuredIsLiveStream && data.featuredYoutubeUrl;
 
-        iframe.src = data.featured.youtube;
+    if (showStream) {
 
+        iframe.src = data.featuredYoutubeUrl;
         iframe.style.display = "block";
         ground.style.display = "none";
 
@@ -458,6 +417,115 @@ function loadData(data) {
         ground.style.display = "block";
 
     }
+
+    featuredFooter.style.display = data.featuredIsLiveStream ? "none" : "flex";
+
+    // Sidebar: whichever slots are not currently featured, in order
+
+    const sideSlotIds = SLOT_IDS.filter((id) => id !== data.featuredSlotId);
+
+    sideSlotIds.forEach((slotId, index) => {
+
+        const slot = data.slots[slotId];
+        const cardKey = SIDE_CARD_KEYS[index];
+        const num = index + 2; // matches existing DOM ids match2/3/4
+
+        document.getElementById(`cardName${num}`).textContent = slot.teamName;
+
+        document.getElementById(`match${num}Title`).textContent =
+            slot.opponent ? `v ${slot.opponent}` : "";
+
+        document.getElementById(`match${num}Score`).textContent = slot.score;
+
+        document.getElementById(`match${num}Status`).textContent = slot.status;
+
+    });
+
+    renderAnnouncements(data.announcements);
+    renderSponsors(data.sponsorImages);
+
+}
+
+// ------------------------------------------------------
+// Scrolling marquees (club news + sponsors)
+// ------------------------------------------------------
+
+const MARQUEE_SPEED_PX_PER_SEC = 70;
+const MARQUEE_MIN_DURATION_SEC = 10;
+
+function buildMarqueeTrack(trackEl, items, appendItem) {
+
+    trackEl.textContent = "";
+
+    if (!items || items.length === 0) {
+        trackEl.style.animation = "none";
+        return;
+    }
+
+    for (let copy = 0; copy < 2; copy++) {
+
+        items.forEach((item) => {
+
+            appendItem(trackEl, item);
+
+            const separator = document.createElement("span");
+            separator.className = "marquee-separator";
+            separator.textContent = "•";
+            trackEl.appendChild(separator);
+
+        });
+
+    }
+
+    trackEl.style.animation = "";
+
+    const halfWidth = trackEl.scrollWidth / 2;
+    const duration = Math.max(halfWidth / MARQUEE_SPEED_PX_PER_SEC, MARQUEE_MIN_DURATION_SEC);
+
+    trackEl.style.animationDuration = `${duration}s`;
+
+}
+
+function renderAnnouncements(announcements) {
+
+    const track = document.getElementById("announcementTrack");
+
+    buildMarqueeTrack(track, announcements, (el, text) => {
+
+        const span = document.createElement("span");
+        span.textContent = text;
+        el.appendChild(span);
+
+    });
+
+}
+
+function renderSponsors(sponsorImages) {
+
+    const sponsorPanel = document.getElementById("sponsorPanel");
+    const bottomPanels = document.getElementById("bottomPanels");
+    const track = document.getElementById("sponsorTrack");
+
+    if (!sponsorImages || sponsorImages.length === 0) {
+
+        sponsorPanel.style.display = "none";
+        bottomPanels.style.gridTemplateColumns = "1fr";
+
+        return;
+
+    }
+
+    sponsorPanel.style.display = "flex";
+    bottomPanels.style.gridTemplateColumns = "420px 1fr";
+
+    buildMarqueeTrack(track, sponsorImages, (el, src) => {
+
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "Sponsor";
+        el.appendChild(img);
+
+    });
 
 }
 
