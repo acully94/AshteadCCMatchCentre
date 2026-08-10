@@ -5,7 +5,11 @@
 
 const CONFIG_KEY = "matchCentreConfig";
 
-const CARD_SLOTS = ["second", "third", "fourth"];
+const SLOT_IDS = ["slot1", "slot2", "slot3", "slot4"];
+const SLOT_FIELDS = [
+    "teamName", "opponent", "matchId", "fixtureType",
+    "score", "overs", "status", "batterOne", "batterTwo", "bowler"
+];
 
 function loadConfig() {
 
@@ -25,40 +29,45 @@ function loadConfig() {
 
 }
 
+function linesToList(text) {
+
+    return text
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+}
+
 function fillForm(config) {
 
     if (!config) return;
 
     const pc = config.playCricket || {};
-    const featured = config.featured || {};
 
     document.getElementById("pcSiteId").value = pc.siteId || "";
     document.getElementById("pcApiToken").value = pc.apiToken || "";
 
-    document.getElementById("featuredMatchId").value = featured.matchId || "";
-    document.getElementById("featuredFixtureType").value = featured.fixtureType || "";
-    document.getElementById("featuredTeam").value = featured.team || "";
-    document.getElementById("featuredOpponent").value = featured.opponent || "";
-    document.getElementById("featuredScore").value = featured.score || "";
-    document.getElementById("featuredOvers").value = featured.overs || "";
-    document.getElementById("featuredBatterOne").value = featured.batterOne || "";
-    document.getElementById("featuredBatterTwo").value = featured.batterTwo || "";
-    document.getElementById("featuredBowler").value = featured.bowler || "";
-    document.getElementById("youtubeUrl").value = featured.youtubeUrl || "";
+    document.getElementById("featuredSlotSelect").value = config.featuredSlotId || "slot1";
+    document.getElementById("featuredIsLiveStream").checked = !!config.featuredIsLiveStream;
+    document.getElementById("youtubeUrl").value = config.featuredYoutubeUrl || "";
 
-    CARD_SLOTS.forEach((slotKey) => {
+    SLOT_IDS.forEach((slotId) => {
 
-        const slot = config[slotKey] || {};
+        const slot = (config.slots && config.slots[slotId]) || {};
 
-        document.getElementById(`${slotKey}MatchId`).value = slot.matchId || "";
-        document.getElementById(`${slotKey}Title`).value = slot.title || "";
-        document.getElementById(`${slotKey}Score`).value = slot.score || "";
-        document.getElementById(`${slotKey}Status`).value = slot.status || "";
+        SLOT_FIELDS.forEach((field) => {
+
+            const fieldId = slotId + field.charAt(0).toUpperCase() + field.slice(1);
+            const el = document.getElementById(fieldId);
+
+            if (el) el.value = slot[field] || "";
+
+        });
 
     });
 
-    document.getElementById("sponsorImage").value = config.sponsorImage || "";
-    document.getElementById("clubAnnouncement").value = config.announcement || "";
+    document.getElementById("sponsorImages").value = (config.sponsorImages || []).join("\n");
+    document.getElementById("clubAnnouncements").value = (config.announcements || []).join("\n");
 
 }
 
@@ -71,32 +80,31 @@ function readForm() {
             apiToken: document.getElementById("pcApiToken").value.trim()
         },
 
-        featured: {
-            matchId: document.getElementById("featuredMatchId").value.trim(),
-            fixtureType: document.getElementById("featuredFixtureType").value.trim(),
-            team: document.getElementById("featuredTeam").value.trim(),
-            opponent: document.getElementById("featuredOpponent").value.trim(),
-            score: document.getElementById("featuredScore").value.trim(),
-            overs: document.getElementById("featuredOvers").value.trim(),
-            batterOne: document.getElementById("featuredBatterOne").value.trim(),
-            batterTwo: document.getElementById("featuredBatterTwo").value.trim(),
-            bowler: document.getElementById("featuredBowler").value.trim(),
-            youtubeUrl: document.getElementById("youtubeUrl").value.trim()
-        },
+        featuredSlotId: document.getElementById("featuredSlotSelect").value,
+        featuredIsLiveStream: document.getElementById("featuredIsLiveStream").checked,
+        featuredYoutubeUrl: document.getElementById("youtubeUrl").value.trim(),
 
-        sponsorImage: document.getElementById("sponsorImage").value.trim(),
-        announcement: document.getElementById("clubAnnouncement").value.trim()
+        slots: {},
+
+        sponsorImages: linesToList(document.getElementById("sponsorImages").value),
+        announcements: linesToList(document.getElementById("clubAnnouncements").value)
 
     };
 
-    CARD_SLOTS.forEach((slotKey) => {
+    SLOT_IDS.forEach((slotId) => {
 
-        config[slotKey] = {
-            matchId: document.getElementById(`${slotKey}MatchId`).value.trim(),
-            title: document.getElementById(`${slotKey}Title`).value.trim(),
-            score: document.getElementById(`${slotKey}Score`).value.trim(),
-            status: document.getElementById(`${slotKey}Status`).value.trim()
-        };
+        const slot = {};
+
+        SLOT_FIELDS.forEach((field) => {
+
+            const fieldId = slotId + field.charAt(0).toUpperCase() + field.slice(1);
+            const el = document.getElementById(fieldId);
+
+            slot[field] = el ? el.value.trim() : "";
+
+        });
+
+        config.slots[slotId] = slot;
 
     });
 
