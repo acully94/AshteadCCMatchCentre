@@ -1,41 +1,169 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2113.3">
-  <style type="text/css">
-    body {background-color: #06100b}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Arial; color: #0000e9; -webkit-text-stroke: #0000e9}
-    p.p3 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff}
-    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff}
-    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 11.0px 'Helvetica Neue'; color: #000000; color: rgba(0, 0, 0, 0.85); -webkit-text-stroke: rgba(0, 0, 0, 0.85)}
-    span.s1 {font-kerning: none}
-    span.s2 {text-decoration: underline ; font-kerning: none}
-    span.s3 {font-kerning: none; color: #ffffff; -webkit-text-stroke: 0px #ffffff}
-    span.s4 {font-kerning: none; background-color: #b3b3b3}
-    span.s5 {font: 12.0px Arial; font-kerning: none; color: #ffffff; -webkit-text-stroke: 0px #ffffff}
-  </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ashtead Match Centre — Admin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
 </head>
-<body>
-<h1 style="margin: 0.0px 0.0px 16.1px 0.0px; font: 24.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>Match Centre Admin</b></span></h1>
-<p class="p2"><span class="s2"><a href="file:///Users/caitlin/Downloads/tv.html">Open Match Centre →</a></span><span class="s3"><span class="Apple-converted-space"> </span></span></p>
-<p class="p3"><span class="s1">Settings save to this browser only (there's no shared server). Live Play-Cricket scores will still update on every device automatically, but the setup fields below (team names, sponsor, YouTube link) only apply on whichever browser you save them in — so open this page on the TV's own browser to configure it directly, or use the same browser you use for the display.<span class="Apple-converted-space"> </span></span></p>
-<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>Play-Cricket Live Scores</b></span></h2>
-<p class="p3"><span class="s1">Enter your club's Play-Cricket API token, then set a Match ID for each fixture below to pull live scores automatically every 30 seconds. Leave a Match ID blank to fall back to the manual fields for that fixture instead.<span class="Apple-converted-space"> </span></span></p>
-<p class="p5"><span class="s1">Play-Cricket Site ID Play-Cricket API Token<span class="Apple-converted-space"> </span></span></p>
-<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>Featured Match — 1st XI</b></span></h2>
-<p class="p5"><span class="s1">Play-Cricket Match ID Fixture Type Label Team Opponent Score (manual fallback) Overs (manual fallback) Batter One (manual fallback) Batter Two (manual fallback) Bowler (manual fallback) YouTube Stream URL<span class="Apple-converted-space"> </span></span></p>
-<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>2nd XI</b></span></h2>
-<p class="p5"><span class="s1">Play-Cricket Match ID Title (manual fallback) Score (manual fallback) Status (manual fallback)<span class="Apple-converted-space"> </span></span></p>
-<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>3rd XI</b></span></h2>
-<p class="p5"><span class="s1">Play-Cricket Match ID Title (manual fallback) Score (manual fallback) Status (manual fallback)<span class="Apple-converted-space"> </span></span></p>
-<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>4th XI</b></span></h2>
-<p class="p5"><span class="s1">Play-Cricket Match ID Title (manual fallback) Score (manual fallback) Status (manual fallback)<span class="Apple-converted-space"> </span></span></p>
-<h2 style="margin: 0.0px 0.0px 14.9px 0.0px; font: 18.0px Arial; color: #ffffff; -webkit-text-stroke: #ffffff"><span class="s1"><b>Sponsor &amp; Club News</b></span></h2>
-<p class="p5"><span class="s1">Sponsor Image URL Club Announcement<span class="Apple-converted-space"> </span></span></p>
-<p class="p6"><span class="s4">Save Settings</span><span class="s5"><span class="Apple-converted-space"> </span></span></p>
+
+<body class="admin-body">
+
+<div class="admin-page">
+
+    <header class="admin-header">
+        <h1>Match Centre Admin</h1>
+        <a class="admin-link" href="tv.html" target="_blank">Open Match Centre &rarr;</a>
+    </header>
+
+    <p class="admin-note">
+        Settings save to this browser only (there's no shared server). Live
+        Play-Cricket scores will still update on every device automatically,
+        but the setup fields below (team names, sponsor, YouTube link) only
+        apply on whichever browser you save them in — so open this page on
+        the TV's own browser to configure it directly, or use the same
+        browser you use for the display.
+    </p>
+
+    <section class="admin-section">
+        <h2>Play-Cricket Live Scores</h2>
+        <p class="admin-hint">
+            Enter your club's Play-Cricket API token, then set a Match ID
+            for each fixture below to pull live scores automatically every
+            30 seconds. Leave a Match ID blank to fall back to the manual
+            fields for that fixture instead.
+        </p>
+        <div class="admin-grid">
+            <label>Play-Cricket Site ID
+                <input id="pcSiteId" type="text" placeholder="e.g. 1234">
+            </label>
+            <label>Play-Cricket API Token
+                <input id="pcApiToken" type="password" placeholder="API token">
+            </label>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>Featured Match — 1st XI</h2>
+        <div class="admin-grid">
+            <label>Play-Cricket Match ID
+                <input id="featuredMatchId" type="text" placeholder="e.g. 7654321">
+            </label>
+            <label>Fixture Type Label
+                <input id="featuredFixtureType" type="text" placeholder="1ST XI • HOME">
+            </label>
+            <label>Team
+                <input id="featuredTeam" type="text" placeholder="Ashtead 1st XI">
+            </label>
+            <label>Opponent
+                <input id="featuredOpponent" type="text" placeholder="Reigate Priory">
+            </label>
+            <label>Score (manual fallback)
+                <input id="featuredScore" type="text" placeholder="184 / 4">
+            </label>
+            <label>Overs (manual fallback)
+                <input id="featuredOvers" type="text" placeholder="34.2 overs">
+            </label>
+            <label>Batter One (manual fallback)
+                <input id="featuredBatterOne" type="text" placeholder="J Smith 82*">
+            </label>
+            <label>Batter Two (manual fallback)
+                <input id="featuredBatterTwo" type="text" placeholder="T Brown 36*">
+            </label>
+            <label>Bowler (manual fallback)
+                <input id="featuredBowler" type="text" placeholder="A Jones 7-0-42-1">
+            </label>
+            <label>YouTube Stream URL
+                <input id="youtubeUrl" type="text" placeholder="https://www.youtube.com/embed/...">
+            </label>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>2nd XI</h2>
+        <div class="admin-grid">
+            <label>Play-Cricket Match ID
+                <input id="secondMatchId" type="text">
+            </label>
+            <label>Title (manual fallback)
+                <input id="secondTitle" type="text" placeholder="v Banstead">
+            </label>
+            <label>Score (manual fallback)
+                <input id="secondScore" type="text" placeholder="147 / 5">
+            </label>
+            <label>Status (manual fallback)
+                <input id="secondStatus" type="text" placeholder="Need 88 from 96 balls">
+            </label>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>3rd XI</h2>
+        <div class="admin-grid">
+            <label>Play-Cricket Match ID
+                <input id="thirdMatchId" type="text">
+            </label>
+            <label>Title (manual fallback)
+                <input id="thirdTitle" type="text" placeholder="v Leatherhead">
+            </label>
+            <label>Score (manual fallback)
+                <input id="thirdScore" type="text" placeholder="212 all out">
+            </label>
+            <label>Status (manual fallback)
+                <input id="thirdStatus" type="text" placeholder="Leatherhead 58/2">
+            </label>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>4th XI</h2>
+        <div class="admin-grid">
+            <label>Play-Cricket Match ID
+                <input id="fourthMatchId" type="text">
+            </label>
+            <label>Title (manual fallback)
+                <input id="fourthTitle" type="text" placeholder="v Old Rutlishians">
+            </label>
+            <label>Score (manual fallback)
+                <input id="fourthScore" type="text" placeholder="Rain Delay">
+            </label>
+            <label>Status (manual fallback)
+                <input id="fourthStatus" type="text" placeholder="Restart 15:20">
+            </label>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>Sponsor &amp; Club News</h2>
+        <div class="admin-grid">
+            <label>Sponsor Image URL
+                <input id="sponsorImage" type="text" placeholder="images/sponsor.png">
+            </label>
+            <label>Club Announcement
+                <textarea id="clubAnnouncement" rows="3" placeholder="Bar open all day. BBQ from 12:30."></textarea>
+            </label>
+        </div>
+    </section>
+
+    <div class="admin-actions">
+        <button id="saveButton" type="button">Save Settings</button>
+        <span id="statusMessage" class="admin-status"></span>
+    </div>
+
+</div>
+
+<script src="admin.js"></script>
+
 </body>
+
 </html>
