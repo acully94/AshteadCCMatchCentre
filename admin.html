@@ -39,9 +39,9 @@
         <h2>Play-Cricket Live Scores</h2>
         <p class="admin-hint">
             Enter your club's Play-Cricket API token, then set a Match ID
-            for each fixture below to pull live scores automatically every
-            30 seconds. Leave a Match ID blank to fall back to the manual
-            fields for that fixture instead.
+            on any of the 4 fixture slots below to pull live scores
+            automatically every 30 seconds. Leave a Match ID blank to fall
+            back to that slot's manual fields instead.
         </p>
         <div class="admin-grid">
             <label>Play-Cricket Site ID
@@ -54,34 +54,28 @@
     </section>
 
     <section class="admin-section">
-        <h2>Featured Match — 1st XI</h2>
+        <h2>Featured Match</h2>
+        <p class="admin-hint">
+            Pick which of the 4 fixture slots below gets the big featured
+            panel (video + large score). If that match is being live
+            streamed, turn the toggle on and add the stream URL — the
+            stream itself (e.g. via Frogbox) already overlays the score, so
+            the Match Centre will show only the video and hide its own
+            score/batting overlay. Turn it off to show the Play-Cricket /
+            manual scorecard details instead.
+        </p>
         <div class="admin-grid">
-            <label>Play-Cricket Match ID
-                <input id="featuredMatchId" type="text" placeholder="e.g. 7654321">
+            <label>Featured Slot
+                <select id="featuredSlotSelect">
+                    <option value="slot1">Slot 1</option>
+                    <option value="slot2">Slot 2</option>
+                    <option value="slot3">Slot 3</option>
+                    <option value="slot4">Slot 4</option>
+                </select>
             </label>
-            <label>Fixture Type Label
-                <input id="featuredFixtureType" type="text" placeholder="1ST XI • HOME">
-            </label>
-            <label>Team
-                <input id="featuredTeam" type="text" placeholder="Ashtead 1st XI">
-            </label>
-            <label>Opponent
-                <input id="featuredOpponent" type="text" placeholder="Reigate Priory">
-            </label>
-            <label>Score (manual fallback)
-                <input id="featuredScore" type="text" placeholder="184 / 4">
-            </label>
-            <label>Overs (manual fallback)
-                <input id="featuredOvers" type="text" placeholder="34.2 overs">
-            </label>
-            <label>Batter One (manual fallback)
-                <input id="featuredBatterOne" type="text" placeholder="J Smith 82*">
-            </label>
-            <label>Batter Two (manual fallback)
-                <input id="featuredBatterTwo" type="text" placeholder="T Brown 36*">
-            </label>
-            <label>Bowler (manual fallback)
-                <input id="featuredBowler" type="text" placeholder="A Jones 7-0-42-1">
+            <label class="admin-checkbox-label">
+                <input id="featuredIsLiveStream" type="checkbox">
+                This match is live streamed
             </label>
             <label>YouTube Stream URL
                 <input id="youtubeUrl" type="text" placeholder="https://www.youtube.com/embed/...">
@@ -90,67 +84,162 @@
     </section>
 
     <section class="admin-section">
-        <h2>2nd XI</h2>
+        <h2>Slot 1</h2>
         <div class="admin-grid">
-            <label>Play-Cricket Match ID
-                <input id="secondMatchId" type="text">
+            <label>Team Name
+                <input id="slot1TeamName" type="text" placeholder="Ashtead 1st XI">
             </label>
-            <label>Title (manual fallback)
-                <input id="secondTitle" type="text" placeholder="v Banstead">
+            <label>Opponent
+                <input id="slot1Opponent" type="text" placeholder="Reigate Priory">
+            </label>
+            <label>Play-Cricket Match ID
+                <input id="slot1MatchId" type="text" placeholder="e.g. 7654321">
+            </label>
+            <label>Fixture Type Label
+                <input id="slot1FixtureType" type="text" placeholder="1ST XI • HOME">
             </label>
             <label>Score (manual fallback)
-                <input id="secondScore" type="text" placeholder="147 / 5">
+                <input id="slot1Score" type="text" placeholder="184 / 4">
+            </label>
+            <label>Overs (manual fallback)
+                <input id="slot1Overs" type="text" placeholder="34.2 overs">
             </label>
             <label>Status (manual fallback)
-                <input id="secondStatus" type="text" placeholder="Need 88 from 96 balls">
+                <input id="slot1Status" type="text" placeholder="Need 88 from 96 balls">
+            </label>
+            <label>Batter One (manual fallback)
+                <input id="slot1BatterOne" type="text" placeholder="J Smith 82*">
+            </label>
+            <label>Batter Two (manual fallback)
+                <input id="slot1BatterTwo" type="text" placeholder="T Brown 36*">
+            </label>
+            <label>Bowler (manual fallback)
+                <input id="slot1Bowler" type="text" placeholder="A Jones 7-0-42-1">
             </label>
         </div>
     </section>
 
     <section class="admin-section">
-        <h2>3rd XI</h2>
+        <h2>Slot 2</h2>
         <div class="admin-grid">
-            <label>Play-Cricket Match ID
-                <input id="thirdMatchId" type="text">
+            <label>Team Name
+                <input id="slot2TeamName" type="text" placeholder="Ashtead 2nd XI">
             </label>
-            <label>Title (manual fallback)
-                <input id="thirdTitle" type="text" placeholder="v Leatherhead">
+            <label>Opponent
+                <input id="slot2Opponent" type="text" placeholder="Banstead">
+            </label>
+            <label>Play-Cricket Match ID
+                <input id="slot2MatchId" type="text">
+            </label>
+            <label>Fixture Type Label
+                <input id="slot2FixtureType" type="text">
             </label>
             <label>Score (manual fallback)
-                <input id="thirdScore" type="text" placeholder="212 all out">
+                <input id="slot2Score" type="text" placeholder="147 / 5">
+            </label>
+            <label>Overs (manual fallback)
+                <input id="slot2Overs" type="text">
             </label>
             <label>Status (manual fallback)
-                <input id="thirdStatus" type="text" placeholder="Leatherhead 58/2">
+                <input id="slot2Status" type="text" placeholder="Need 88 from 96 balls">
+            </label>
+            <label>Batter One (manual fallback)
+                <input id="slot2BatterOne" type="text">
+            </label>
+            <label>Batter Two (manual fallback)
+                <input id="slot2BatterTwo" type="text">
+            </label>
+            <label>Bowler (manual fallback)
+                <input id="slot2Bowler" type="text">
             </label>
         </div>
     </section>
 
     <section class="admin-section">
-        <h2>4th XI</h2>
+        <h2>Slot 3</h2>
         <div class="admin-grid">
-            <label>Play-Cricket Match ID
-                <input id="fourthMatchId" type="text">
+            <label>Team Name
+                <input id="slot3TeamName" type="text" placeholder="Ashtead 3rd XI">
             </label>
-            <label>Title (manual fallback)
-                <input id="fourthTitle" type="text" placeholder="v Old Rutlishians">
+            <label>Opponent
+                <input id="slot3Opponent" type="text" placeholder="Leatherhead">
+            </label>
+            <label>Play-Cricket Match ID
+                <input id="slot3MatchId" type="text">
+            </label>
+            <label>Fixture Type Label
+                <input id="slot3FixtureType" type="text">
             </label>
             <label>Score (manual fallback)
-                <input id="fourthScore" type="text" placeholder="Rain Delay">
+                <input id="slot3Score" type="text" placeholder="212 all out">
+            </label>
+            <label>Overs (manual fallback)
+                <input id="slot3Overs" type="text">
             </label>
             <label>Status (manual fallback)
-                <input id="fourthStatus" type="text" placeholder="Restart 15:20">
+                <input id="slot3Status" type="text" placeholder="Leatherhead 58/2">
+            </label>
+            <label>Batter One (manual fallback)
+                <input id="slot3BatterOne" type="text">
+            </label>
+            <label>Batter Two (manual fallback)
+                <input id="slot3BatterTwo" type="text">
+            </label>
+            <label>Bowler (manual fallback)
+                <input id="slot3Bowler" type="text">
+            </label>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2>Slot 4</h2>
+        <div class="admin-grid">
+            <label>Team Name
+                <input id="slot4TeamName" type="text" placeholder="Ashtead 4th XI">
+            </label>
+            <label>Opponent
+                <input id="slot4Opponent" type="text" placeholder="Old Rutlishians">
+            </label>
+            <label>Play-Cricket Match ID
+                <input id="slot4MatchId" type="text">
+            </label>
+            <label>Fixture Type Label
+                <input id="slot4FixtureType" type="text">
+            </label>
+            <label>Score (manual fallback)
+                <input id="slot4Score" type="text" placeholder="Rain Delay">
+            </label>
+            <label>Overs (manual fallback)
+                <input id="slot4Overs" type="text">
+            </label>
+            <label>Status (manual fallback)
+                <input id="slot4Status" type="text" placeholder="Restart 15:20">
+            </label>
+            <label>Batter One (manual fallback)
+                <input id="slot4BatterOne" type="text">
+            </label>
+            <label>Batter Two (manual fallback)
+                <input id="slot4BatterTwo" type="text">
+            </label>
+            <label>Bowler (manual fallback)
+                <input id="slot4Bowler" type="text">
             </label>
         </div>
     </section>
 
     <section class="admin-section">
         <h2>Sponsor &amp; Club News</h2>
+        <p class="admin-hint">
+            Both scroll continuously across the bottom of the Match Centre.
+            One entry per line — leave sponsor images blank to hide that
+            panel entirely.
+        </p>
         <div class="admin-grid">
-            <label>Sponsor Image URL
-                <input id="sponsorImage" type="text" placeholder="images/sponsor.png">
+            <label>Sponsor Image URLs (one per line)
+                <textarea id="sponsorImages" rows="4" placeholder="images/sponsor1.png&#10;images/sponsor2.png"></textarea>
             </label>
-            <label>Club Announcement
-                <textarea id="clubAnnouncement" rows="3" placeholder="Bar open all day. BBQ from 12:30."></textarea>
+            <label>Club Announcements (one per line)
+                <textarea id="clubAnnouncements" rows="4" placeholder="Bar open all day&#10;BBQ from 12:30&#10;Junior training Sunday 9:30"></textarea>
             </label>
         </div>
     </section>
