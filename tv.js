@@ -63,16 +63,15 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // ------------------------------------------------------
-// Config (saved from admin.html) + Play-Cricket live scores
+// Config (saved from admin.html)
 // ------------------------------------------------------
 
 const CONFIG_KEY = "matchCentreConfig";
-const CLUB_NAME_MATCH = "ashtead";
 const REFRESH_INTERVAL_MS = 30000;
-const PLAY_CRICKET_MATCH_DETAIL_URL = "https://play-cricket.com/api/v2/match_detail.json";
+const SCORECARD_POLL_INTERVAL_MS = 5000;
+const CLUB_NAME_MATCH = "ashtead";
 
 const SLOT_IDS = ["slot1", "slot2", "slot3", "slot4"];
-const SIDE_CARD_KEYS = ["second", "third", "fourth"];
 
 function getConfig() {
 
@@ -94,7 +93,7 @@ function getConfig() {
 
 // ------------------------------------------------------
 // Default data
-// (used until admin.html config and/or Play-Cricket data override it)
+// (used until admin.html config overrides it)
 // ------------------------------------------------------
 
 const sampleData = {
@@ -164,13 +163,13 @@ const sampleData = {
         "Junior training Sunday 9:30"
     ],
 
-    sponsorImages: []
+    sponsors: [],
+
+    sponsorImageHeight: 64
 
 };
 
-// Layer the admin-entered manual fields on top of the built-in sample
-// data. These are the fields shown until (or unless) a Play-Cricket Match
-// ID is configured and a live fetch succeeds for that fixture.
+// Layer the admin-entered manual fields on top of the built-in sample data.
 
 function buildDataFromConfig(config) {
 
@@ -207,53 +206,55 @@ function buildDataFromConfig(config) {
         data.announcements = config.announcements;
     }
 
-    if (Array.isArray(config.sponsorImages)) {
-        data.sponsorImages = config.sponsorImages;
+    if (Array.isArray(config.sponsors)) {
+        data.sponsors = config.sponsors;
+    }
+
+    if (config.sponsorImageHeight) {
+        data.sponsorImageHeight = config.sponsorImageHeight;
     }
 
     return data;
 
 }
 
-// ------------------------------------------------------
-// Play-Cricket live scores (best-effort — see admin.html note).
-//
-// NOTE: this has not been tested against a live Play-Cricket API from
-// this environment (its network is sandboxed). If scores don't appear,
-// open the browser console and look for "[PlayCricket]" warnings — the
-// most likely causes are (a) the API rejecting cross-origin browser
-// requests (CORS), which would need a small server-side proxy, or (b)
-// the response field names below not matching your data. Set
-// window.PLAY_CRICKET_DEBUG = true in the console to log raw responses.
-// ------------------------------------------------------
+function buildLiveScorecardConfig(config) {
 
-async function fetchPlayCricketMatch(matchId, apiToken, siteId) {
+    if (!config || !config.scorecardProxyUrl) return null;
 
-    const params = new URLSearchParams({
-        match_id: matchId,
-        api_token: apiToken
+    const slots = {};
+
+    SLOT_IDS.forEach((slotId) => {
+
+        const slot = config.slots && config.slots[slotId];
+
+        if (slot && slot.matchId) slots[slotId] = slot.matchId;
+
     });
 
-    if (siteId) params.set("site_id", siteId);
+    if (Object.keys(slots).length === 0) return null;
 
-    const response = await fetch(`${PLAY_CRICKET_MATCH_DETAIL_URL}?${params.toString()}`);
+    return { proxyUrl: config.scorecardProxyUrl.trim(), slots };
+
+}
+
+// ------------------------------------------------------
+// Live scorecard polling (via the scorecard proxy — see
+// scorecard-proxy-worker.js for what it does and why it's needed).
+// ------------------------------------------------------
+
+async function fetchLiveScorecard(proxyUrl, matchId) {
+
+    const separator = proxyUrl.includes("?") ? "&" : "?";
+    const url = `${proxyUrl}${separator}matchId=${encodeURIComponent(matchId)}`;
+
+    const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error(`Play-Cricket API returned ${response.status}`);
+        throw new Error(`Scorecard proxy returned ${response.status}`);
     }
 
-    const json = await response.json();
-    const match = json && json.match_details && json.match_details[0];
-
-    if (!match) {
-        throw new Error("Play-Cricket response had no match_details");
-    }
-
-    if (window.PLAY_CRICKET_DEBUG) {
-        console.log("[PlayCricket] raw match", matchId, match);
-    }
-
-    return match;
+    return response.json();
 
 }
 
@@ -261,71 +262,79 @@ function isOurClub(name) {
     return typeof name === "string" && name.toLowerCase().includes(CLUB_NAME_MATCH);
 }
 
-function latestInnings(match) {
+function cleanPlayerName(name) {
+    return (name || "").replace(/[*†]+$/g, "").trim();
+}
 
-    if (!Array.isArray(match.innings) || match.innings.length === 0) return null;
+function latestInnings(scorecard) {
 
-    return match.innings[match.innings.length - 1];
+    const innings = scorecard.Innings;
+
+    if (!Array.isArray(innings) || innings.length === 0) return null;
+
+    return innings[innings.length - 1];
 
 }
 
-function formatScoreLine(innings) {
+function formatInningsScore(innings) {
 
-    const wickets = Number(innings.wickets);
-
-    if (Number.isFinite(wickets) && wickets >= 10) {
-        return `${innings.runs} all out`;
+    if (innings.TotalWickets >= 10) {
+        return `${innings.TotalRuns} all out`;
     }
 
-    return `${innings.runs} / ${innings.wickets}`;
+    return `${innings.TotalRuns} / ${innings.TotalWickets}`;
 
 }
 
-function notOutBatters(innings) {
+function activeBatters(innings) {
 
-    if (!innings || !Array.isArray(innings.bat)) return [];
+    if (!innings || !Array.isArray(innings.BattingCard)) return [];
 
-    return innings.bat
-        .filter((b) => {
-            const howOut = (b.how_out || "").trim().toLowerCase();
-            return howOut === "" || howOut === "not out";
-        })
-        .slice(-2)
-        .map((b) => `${b.batsman_name} ${b.runs}*`);
+    return innings.BattingCard
+        .filter((b) => !b.IsSummary && (b.IsFirstActive || b.IsSecondActive))
+        .map((b) => `${cleanPlayerName(b.PlayerName)} ${b.Runs}*`);
 
 }
 
 function currentBowlerLine(innings) {
 
-    if (!innings || !Array.isArray(innings.bowl) || innings.bowl.length === 0) return "";
+    if (!innings || !Array.isArray(innings.BowlingCard)) return "";
 
-    const bowler = innings.bowl[innings.bowl.length - 1];
+    const bowler = innings.BowlingCard.find((b) => b.IsCurrentBowler);
 
-    return `${bowler.bowler_name} ${bowler.overs}-${bowler.maidens}-${bowler.runs}-${bowler.wickets}`;
+    if (!bowler) return "";
+
+    return `${cleanPlayerName(bowler.PlayerName)} ${bowler.Overs}-${bowler.Maidens}-${bowler.Runs}-${bowler.Wickets}`;
 
 }
 
-// Applies live data to a slot. `detailed` also fills batting/bowling —
-// used for whichever slot is currently featured.
+// Applies a live scorecard to a slot. `detailed` also fills batting/
+// bowling — used for whichever slot is currently featured.
 
-function applySlotLiveData(slot, match, detailed) {
+function applyLiveScorecard(slot, scorecard, detailed) {
 
-    const homeIsUs = isOurClub(match.home_club_name);
-    const oppositionName = homeIsUs ? match.away_club_name : match.home_club_name;
+    const match = scorecard.Match;
+
+    if (!match) return;
+
+    const homeIsUs = isOurClub(match.Team1Club || match.Team1Name);
+    const oppositionName = homeIsUs
+        ? (match.Team2Name || match.Team2Club)
+        : (match.Team1Name || match.Team1Club);
 
     if (oppositionName) slot.opponent = oppositionName;
 
-    const innings = latestInnings(match);
+    const innings = latestInnings(scorecard);
 
     if (innings) {
 
-        slot.score = formatScoreLine(innings);
+        slot.score = formatInningsScore(innings);
 
         if (detailed) {
 
-            if (innings.overs) slot.overs = `${innings.overs} overs`;
+            if (innings.TotalOvers) slot.overs = `${innings.TotalOvers} overs`;
 
-            const batters = notOutBatters(innings);
+            const batters = activeBatters(innings);
 
             if (batters[0]) slot.batterOne = batters[0];
             if (batters[1]) slot.batterTwo = batters[1];
@@ -338,38 +347,36 @@ function applySlotLiveData(slot, match, detailed) {
 
     }
 
-    if (match.status) slot.status = match.status;
+    if (match.MatchSituation) slot.status = match.MatchSituation;
 
 }
 
-async function refreshLiveScores(config, data) {
+async function refreshLiveScorecards() {
 
-    const apiToken = config && config.playCricket && config.playCricket.apiToken;
+    if (!currentData || !liveScorecardConfig) return;
 
-    if (!apiToken) return data;
+    const jobs = Object.keys(liveScorecardConfig.slots).map(async (slotId) => {
 
-    const siteId = config.playCricket.siteId;
-    const jobs = [];
+        const matchId = liveScorecardConfig.slots[slotId];
 
-    SLOT_IDS.forEach((slotId) => {
+        try {
 
-        const configSlot = config.slots && config.slots[slotId];
+            const scorecard = await fetchLiveScorecard(liveScorecardConfig.proxyUrl, matchId);
+            const isFeatured = slotId === currentData.featuredSlotId;
 
-        if (!configSlot || !configSlot.matchId) return;
+            applyLiveScorecard(currentData.slots[slotId], scorecard, isFeatured);
 
-        const isFeatured = slotId === data.featuredSlotId;
+        } catch (err) {
 
-        jobs.push(
-            fetchPlayCricketMatch(configSlot.matchId, apiToken, siteId)
-                .then((match) => applySlotLiveData(data.slots[slotId], match, isFeatured))
-                .catch((err) => console.warn(`[PlayCricket] ${slotId} match fetch failed:`, err.message))
-        );
+            console.warn(`[LiveScores] ${slotId} fetch failed:`, err.message);
+
+        }
 
     });
 
     await Promise.all(jobs);
 
-    return data;
+    loadData(currentData);
 
 }
 
@@ -427,7 +434,6 @@ function loadData(data) {
     sideSlotIds.forEach((slotId, index) => {
 
         const slot = data.slots[slotId];
-        const cardKey = SIDE_CARD_KEYS[index];
         const num = index + 2; // matches existing DOM ids match2/3/4
 
         document.getElementById(`cardName${num}`).textContent = slot.teamName;
@@ -441,72 +447,92 @@ function loadData(data) {
 
     });
 
-    renderAnnouncements(data.announcements);
-    renderSponsors(data.sponsorImages);
+    // Only rebuild the news marquee / sponsor slideshow when their content
+    // actually changed — rebuilding on every 30s data refresh would reset
+    // the scroll position / restart whichever slide is currently showing.
+
+    const announcementsKey = JSON.stringify(data.announcements);
+
+    if (announcementsKey !== lastAnnouncementsKey) {
+        lastAnnouncementsKey = announcementsKey;
+        renderAnnouncements(data.announcements);
+    }
+
+    const sponsorsKey = JSON.stringify(data.sponsors) + "|" + data.sponsorImageHeight;
+
+    if (sponsorsKey !== lastSponsorsKey) {
+        lastSponsorsKey = sponsorsKey;
+        renderSponsors(data.sponsors, data.sponsorImageHeight);
+    }
 
 }
 
 // ------------------------------------------------------
-// Scrolling marquees (club news + sponsors)
+// Scrolling club news ticker
 // ------------------------------------------------------
+
+let lastAnnouncementsKey = null;
+let lastSponsorsKey = null;
 
 const MARQUEE_SPEED_PX_PER_SEC = 70;
 const MARQUEE_MIN_DURATION_SEC = 10;
-
-function buildMarqueeTrack(trackEl, items, appendItem) {
-
-    trackEl.textContent = "";
-
-    if (!items || items.length === 0) {
-        trackEl.style.animation = "none";
-        return;
-    }
-
-    for (let copy = 0; copy < 2; copy++) {
-
-        items.forEach((item) => {
-
-            appendItem(trackEl, item);
-
-            const separator = document.createElement("span");
-            separator.className = "marquee-separator";
-            separator.textContent = "•";
-            trackEl.appendChild(separator);
-
-        });
-
-    }
-
-    trackEl.style.animation = "";
-
-    const halfWidth = trackEl.scrollWidth / 2;
-    const duration = Math.max(halfWidth / MARQUEE_SPEED_PX_PER_SEC, MARQUEE_MIN_DURATION_SEC);
-
-    trackEl.style.animationDuration = `${duration}s`;
-
-}
 
 function renderAnnouncements(announcements) {
 
     const track = document.getElementById("announcementTrack");
 
-    buildMarqueeTrack(track, announcements, (el, text) => {
+    track.textContent = "";
 
-        const span = document.createElement("span");
-        span.textContent = text;
-        el.appendChild(span);
+    if (!announcements || announcements.length === 0) {
+        track.style.animation = "none";
+        return;
+    }
 
-    });
+    for (let copy = 0; copy < 2; copy++) {
+
+        announcements.forEach((text) => {
+
+            const span = document.createElement("span");
+            span.textContent = text;
+            track.appendChild(span);
+
+            const separator = document.createElement("span");
+            separator.className = "marquee-separator";
+            separator.textContent = "•";
+            track.appendChild(separator);
+
+        });
+
+    }
+
+    track.style.animation = "";
+
+    const halfWidth = track.scrollWidth / 2;
+    const duration = Math.max(halfWidth / MARQUEE_SPEED_PX_PER_SEC, MARQUEE_MIN_DURATION_SEC);
+
+    track.style.animationDuration = `${duration}s`;
 
 }
 
-function renderSponsors(sponsorImages) {
+// ------------------------------------------------------
+// Sponsor slideshow (one sponsor at a time, PowerPoint-style)
+// ------------------------------------------------------
+
+const SPONSOR_FADE_MS = 400;
+const SPONSOR_DEFAULT_DURATION_SEC = 6;
+
+let sponsorSlideIndex = 0;
+let sponsorSlideTimer = null;
+
+function renderSponsors(sponsors, imageHeight) {
 
     const sponsorPanel = document.getElementById("sponsorPanel");
     const bottomPanels = document.getElementById("bottomPanels");
-    const track = document.getElementById("sponsorTrack");
+    const img = document.getElementById("sponsorSlideImage");
 
-    if (!sponsorImages || sponsorImages.length === 0) {
+    clearTimeout(sponsorSlideTimer);
+
+    if (!sponsors || sponsors.length === 0) {
 
         sponsorPanel.style.display = "none";
         bottomPanels.style.gridTemplateColumns = "1fr";
@@ -516,16 +542,32 @@ function renderSponsors(sponsorImages) {
     }
 
     sponsorPanel.style.display = "flex";
-    bottomPanels.style.gridTemplateColumns = "420px 1fr";
+    bottomPanels.style.gridTemplateColumns = "1fr 1fr";
 
-    buildMarqueeTrack(track, sponsorImages, (el, src) => {
+    img.style.height = `${imageHeight}px`;
 
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = "Sponsor";
-        el.appendChild(img);
+    if (sponsorSlideIndex >= sponsors.length) sponsorSlideIndex = 0;
 
-    });
+    const showSlide = () => {
+
+        const sponsor = sponsors[sponsorSlideIndex];
+        const durationMs = Math.max(sponsor.durationSeconds || SPONSOR_DEFAULT_DURATION_SEC, 1) * 1000;
+
+        img.style.opacity = 0;
+
+        setTimeout(() => {
+            img.src = sponsor.image;
+            img.style.opacity = 1;
+        }, SPONSOR_FADE_MS);
+
+        sponsorSlideTimer = setTimeout(() => {
+            sponsorSlideIndex = (sponsorSlideIndex + 1) % sponsors.length;
+            showSlide();
+        }, durationMs);
+
+    };
+
+    showSlide();
 
 }
 
@@ -533,19 +575,25 @@ function renderSponsors(sponsorImages) {
 // Boot + refresh loop
 // ------------------------------------------------------
 
+let currentData = null;
+let liveScorecardConfig = null;
+
 async function refreshAndRender() {
 
     const config = getConfig();
-    const data = buildDataFromConfig(config);
 
-    await refreshLiveScores(config, data);
+    currentData = buildDataFromConfig(config);
+    liveScorecardConfig = buildLiveScorecardConfig(config);
 
-    loadData(data);
+    loadData(currentData);
+
+    await refreshLiveScorecards();
 
 }
 
 refreshAndRender();
 
 setInterval(refreshAndRender, REFRESH_INTERVAL_MS);
+setInterval(refreshLiveScorecards, SCORECARD_POLL_INTERVAL_MS);
 
 scaleScreen();
