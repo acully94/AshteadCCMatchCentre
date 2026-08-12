@@ -11,6 +11,10 @@ const SLOT_FIELDS = [
     "score", "overs", "status", "batterOne", "batterTwo", "bowler"
 ];
 
+const SPONSOR_DEFAULT_DURATION_SEC = 6;
+
+let sponsors = [];
+
 function loadConfig() {
 
     try {
@@ -42,10 +46,7 @@ function fillForm(config) {
 
     if (!config) return;
 
-    const pc = config.playCricket || {};
-
-    document.getElementById("pcSiteId").value = pc.siteId || "";
-    document.getElementById("pcApiToken").value = pc.apiToken || "";
+    document.getElementById("scorecardProxyUrl").value = config.scorecardProxyUrl || "";
 
     document.getElementById("featuredSlotSelect").value = config.featuredSlotId || "slot1";
     document.getElementById("featuredIsLiveStream").checked = !!config.featuredIsLiveStream;
@@ -66,19 +67,101 @@ function fillForm(config) {
 
     });
 
-    document.getElementById("sponsorImages").value = (config.sponsorImages || []).join("\n");
     document.getElementById("clubAnnouncements").value = (config.announcements || []).join("\n");
 
+    document.getElementById("sponsorImageHeight").value = config.sponsorImageHeight || 64;
+
+    sponsors = (config.sponsors || []).map((sponsor) => ({ ...sponsor }));
+
+    renderSponsorList();
+
 }
+
+// ------------------------------------------------------
+// Sponsor list (upload, per-image duration, remove)
+// ------------------------------------------------------
+
+function renderSponsorList() {
+
+    const list = document.getElementById("sponsorList");
+
+    list.textContent = "";
+
+    sponsors.forEach((sponsor, index) => {
+
+        const row = document.createElement("div");
+        row.className = "sponsor-row";
+
+        const thumb = document.createElement("img");
+        thumb.className = "sponsor-thumb";
+        thumb.src = sponsor.image;
+        row.appendChild(thumb);
+
+        const durationLabel = document.createElement("label");
+        durationLabel.className = "sponsor-duration-label";
+        durationLabel.appendChild(document.createTextNode("Seconds"));
+
+        const durationInput = document.createElement("input");
+        durationInput.type = "number";
+        durationInput.min = "1";
+        durationInput.max = "60";
+        durationInput.value = sponsor.durationSeconds || SPONSOR_DEFAULT_DURATION_SEC;
+
+        durationInput.addEventListener("input", () => {
+            sponsors[index].durationSeconds = Number(durationInput.value) || SPONSOR_DEFAULT_DURATION_SEC;
+        });
+
+        durationLabel.appendChild(durationInput);
+        row.appendChild(durationLabel);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "sponsor-remove-btn";
+        removeBtn.textContent = "Remove";
+
+        removeBtn.addEventListener("click", () => {
+            sponsors.splice(index, 1);
+            renderSponsorList();
+        });
+
+        row.appendChild(removeBtn);
+
+        list.appendChild(row);
+
+    });
+
+}
+
+function handleSponsorFiles(fileList) {
+
+    Array.from(fileList).forEach((file) => {
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            sponsors.push({ image: reader.result, durationSeconds: SPONSOR_DEFAULT_DURATION_SEC });
+            renderSponsorList();
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
+document.getElementById("sponsorFileInput").addEventListener("change", (event) => {
+
+    handleSponsorFiles(event.target.files);
+
+    event.target.value = "";
+
+});
 
 function readForm() {
 
     const config = {
 
-        playCricket: {
-            siteId: document.getElementById("pcSiteId").value.trim(),
-            apiToken: document.getElementById("pcApiToken").value.trim()
-        },
+        scorecardProxyUrl: document.getElementById("scorecardProxyUrl").value.trim(),
 
         featuredSlotId: document.getElementById("featuredSlotSelect").value,
         featuredIsLiveStream: document.getElementById("featuredIsLiveStream").checked,
@@ -86,8 +169,10 @@ function readForm() {
 
         slots: {},
 
-        sponsorImages: linesToList(document.getElementById("sponsorImages").value),
-        announcements: linesToList(document.getElementById("clubAnnouncements").value)
+        announcements: linesToList(document.getElementById("clubAnnouncements").value),
+
+        sponsors: sponsors,
+        sponsorImageHeight: Number(document.getElementById("sponsorImageHeight").value) || 64
 
     };
 
