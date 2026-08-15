@@ -586,7 +586,7 @@ BOTTOM ROW
 
     grid-template-columns:
 
-        420px
+        1fr
 
         1fr;
 
@@ -674,7 +674,7 @@ NEWS PANEL
 
 
 /* ======================================================
-SCROLLING MARQUEE (club news + sponsors)
+SCROLLING MARQUEE (club news)
 ====================================================== */
 
 .marquee-viewport{
@@ -721,20 +721,6 @@ SCROLLING MARQUEE (club news + sponsors)
 
 }
 
-.sponsor-track{
-
-    gap:56px;
-
-}
-
-.sponsor-track img{
-
-    height:64px;
-
-    object-fit:contain;
-
-}
-
 @keyframes marquee-scroll{
 
     from{
@@ -744,6 +730,38 @@ SCROLLING MARQUEE (club news + sponsors)
     to{
         transform:translateX(-50%);
     }
+
+}
+
+/* ======================================================
+SPONSOR SLIDESHOW
+====================================================== */
+
+.sponsor-slide-viewport{
+
+    flex:1;
+
+    width:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-height:0;
+
+}
+
+.sponsor-slide-image{
+
+    max-width:90%;
+
+    max-height:100%;
+
+    object-fit:contain;
+
+    transition:opacity .4s;
 
 }
 
@@ -1352,6 +1370,150 @@ ADMIN PAGE
     width:18px;
 
     height:18px;
+
+}
+
+.sponsor-manager{
+
+    margin-top:20px;
+
+}
+
+.sponsor-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+    margin-bottom:14px;
+
+}
+
+.sponsor-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid var(--border);
+
+    border-radius:8px;
+
+    padding:10px 14px;
+
+}
+
+.sponsor-thumb{
+
+    width:60px;
+
+    height:44px;
+
+    object-fit:contain;
+
+    background:rgba(255,255,255,.08);
+
+    border-radius:4px;
+
+}
+
+.sponsor-duration-label{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    font-size:13px;
+
+    color:var(--muted);
+
+    margin-left:auto;
+
+}
+
+.sponsor-duration-label input{
+
+    width:60px;
+
+    font-family:'Inter',sans-serif;
+
+    font-size:14px;
+
+    color:var(--text);
+
+    background:rgba(255,255,255,.06);
+
+    border:1px solid var(--border);
+
+    border-radius:6px;
+
+    padding:6px 8px;
+
+}
+
+.sponsor-remove-btn{
+
+    background:transparent;
+
+    border:1px solid var(--border);
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    padding:6px 12px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.sponsor-remove-btn:hover{
+
+    border-color:var(--red);
+
+    color:var(--red);
+
+}
+
+.admin-upload-label{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:rgba(141,214,77,.12);
+
+    border:1px dashed var(--accent);
+
+    color:var(--accent);
+
+    font-size:14px;
+
+    font-weight:600;
+
+    padding:10px 18px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}
+
+.admin-upload-label:hover{
+
+    background:rgba(141,214,77,.2);
 
 }
 
