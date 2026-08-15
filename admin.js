@@ -3,13 +3,71 @@
 // admin.js
 // ======================================================
 
+// ------------------------------------------------------
+// Password gate. This is a static site with no backend, so this is
+// only a soft deterrent (anyone with browser dev tools could bypass
+// it) — not real security. It's enough to stop casual club members
+// from wandering into settings, which is all it's meant to do.
+// ------------------------------------------------------
+
+const AUTH_KEY = "matchCentreAdminAuth";
+const AUTH_PASSWORD_HASH = "02e4d51f4d1aab4011c4b2cdd427f04f4fda4a6fd6272dc584bce158062879ed";
+
+async function sha256Hex(text) {
+
+    const data = new TextEncoder().encode(text);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+    return Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+}
+
+function unlockAdmin() {
+    document.getElementById("authGate").style.display = "none";
+    document.getElementById("adminPage").style.display = "block";
+}
+
+if (localStorage.getItem(AUTH_KEY) === "true") {
+
+    unlockAdmin();
+
+} else {
+
+    document.getElementById("authForm").addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        const entered = document.getElementById("authPassword").value;
+        const hash = await sha256Hex(entered);
+
+        if (hash === AUTH_PASSWORD_HASH) {
+
+            localStorage.setItem(AUTH_KEY, "true");
+            unlockAdmin();
+
+        } else {
+
+            document.getElementById("authError").textContent = "Incorrect password.";
+            document.getElementById("authPassword").value = "";
+            document.getElementById("authPassword").focus();
+
+        }
+
+    });
+
+}
+
+document.getElementById("lockButton").addEventListener("click", () => {
+    localStorage.removeItem(AUTH_KEY);
+    location.reload();
+});
+
 const CONFIG_KEY = "matchCentreConfig";
 
 const SLOT_IDS = ["slot1", "slot2", "slot3", "slot4"];
-const SLOT_FIELDS = [
-    "teamName", "opponent", "matchId", "fixtureType",
-    "score", "overs", "status", "batterOne", "batterTwo", "bowler"
-];
+const SLOT_FIELDS = ["teamName", "opponent", "matchId", "fixtureType"];
 
 const SPONSOR_DEFAULT_DURATION_SEC = 6;
 
@@ -68,8 +126,6 @@ function fillForm(config) {
     });
 
     document.getElementById("clubAnnouncements").value = (config.announcements || []).join("\n");
-
-    document.getElementById("sponsorImageHeight").value = config.sponsorImageHeight || 64;
 
     sponsors = (config.sponsors || []).map((sponsor) => ({ ...sponsor }));
 
@@ -171,8 +227,7 @@ function readForm() {
 
         announcements: linesToList(document.getElementById("clubAnnouncements").value),
 
-        sponsors: sponsors,
-        sponsorImageHeight: Number(document.getElementById("sponsorImageHeight").value) || 64
+        sponsors: sponsors
 
     };
 
