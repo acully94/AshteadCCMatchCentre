@@ -234,7 +234,20 @@ function buildLiveScorecardConfig(config) {
 
     if (Object.keys(slots).length === 0) return null;
 
-    return { proxyUrl: config.scorecardProxyUrl.trim(), slots };
+    return { proxyUrl: normalizeProxyUrl(config.scorecardProxyUrl), slots };
+
+}
+
+// Tolerate a proxy URL pasted without "https://" — otherwise the browser
+// treats it as relative to the current page and the fetch silently fails.
+
+function normalizeProxyUrl(url) {
+
+    const trimmed = (url || "").trim();
+
+    if (!trimmed || /^https?:\/\//i.test(trimmed)) return trimmed;
+
+    return `https://${trimmed}`;
 
 }
 
