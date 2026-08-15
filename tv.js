@@ -108,14 +108,14 @@ const sampleData = {
 
         slot1: {
             teamName: "1st XI",
-            fixtureType: "1ST XI • HOME",
-            opponent: "Reigate Priory",
-            score: "184 / 4",
-            overs: "34.2 overs",
+            fixtureType: "",
+            opponent: "",
+            score: "",
+            overs: "",
             status: "",
-            batterOne: "J Smith 82*",
-            batterTwo: "T Brown 36*",
-            bowler: "A Jones 7-0-42-1",
+            batterOne: "",
+            batterTwo: "",
+            bowler: "",
             headline: "",
             runRate: "",
             chase: "",
@@ -128,10 +128,10 @@ const sampleData = {
         slot2: {
             teamName: "2nd XI",
             fixtureType: "",
-            opponent: "Banstead",
-            score: "147 / 5",
+            opponent: "",
+            score: "",
             overs: "",
-            status: "Need 88 from 96 balls",
+            status: "",
             batterOne: "",
             batterTwo: "",
             bowler: "",
@@ -147,10 +147,10 @@ const sampleData = {
         slot3: {
             teamName: "3rd XI",
             fixtureType: "",
-            opponent: "Leatherhead",
-            score: "212 all out",
+            opponent: "",
+            score: "",
             overs: "",
-            status: "Leatherhead 58/2",
+            status: "",
             batterOne: "",
             batterTwo: "",
             bowler: "",
@@ -166,10 +166,10 @@ const sampleData = {
         slot4: {
             teamName: "4th XI",
             fixtureType: "",
-            opponent: "Old Rutlishians",
-            score: "Rain Delay",
+            opponent: "",
+            score: "",
             overs: "",
-            status: "Restart 15:20",
+            status: "",
             batterOne: "",
             batterTwo: "",
             bowler: "",
@@ -191,9 +191,7 @@ const sampleData = {
         "Junior training Sunday 9:30"
     ],
 
-    sponsors: [],
-
-    sponsorImageHeight: 64
+    sponsors: []
 
 };
 
@@ -221,12 +219,6 @@ function buildDataFromConfig(config) {
         if (slot.teamName) target.teamName = slot.teamName;
         if (slot.fixtureType) target.fixtureType = slot.fixtureType;
         if (slot.opponent) target.opponent = slot.opponent;
-        if (slot.score) target.score = slot.score;
-        if (slot.overs) target.overs = slot.overs;
-        if (slot.status) target.status = slot.status;
-        if (slot.batterOne) target.batterOne = slot.batterOne;
-        if (slot.batterTwo) target.batterTwo = slot.batterTwo;
-        if (slot.bowler) target.bowler = slot.bowler;
 
     });
 
@@ -238,11 +230,40 @@ function buildDataFromConfig(config) {
         data.sponsors = config.sponsors;
     }
 
-    if (config.sponsorImageHeight) {
-        data.sponsorImageHeight = config.sponsorImageHeight;
+    return data;
+
+}
+
+// Accepts either a bare YouTube video ID (what admin.html now asks for) or
+// a pasted full URL (watch/youtu.be/embed link), and returns a ready-to-use
+// embed URL with autoplay + mute set — needed for a TV with nobody there to
+// press play.
+
+function buildYoutubeEmbedUrl(input) {
+
+    const trimmed = (input || "").trim();
+
+    if (!trimmed) return "";
+
+    let videoId = trimmed;
+
+    const patterns = [
+        /(?:youtube\.com\/embed\/)([\w-]{11})/,
+        /(?:youtube\.com\/watch\?v=)([\w-]{11})/,
+        /(?:youtu\.be\/)([\w-]{11})/
+    ];
+
+    for (const pattern of patterns) {
+        const match = trimmed.match(pattern);
+        if (match) {
+            videoId = match[1];
+            break;
+        }
     }
 
-    return data;
+    if (!/^[\w-]{11}$/.test(videoId)) return "";
+
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0`;
 
 }
 
@@ -667,11 +688,19 @@ function loadData(data) {
     const iframe = document.getElementById("youtubeFrame");
     const ground = document.getElementById("groundImage");
 
-    const showStream = data.featuredIsLiveStream && data.featuredYoutubeUrl;
+    const embedSrc = data.featuredIsLiveStream ? buildYoutubeEmbedUrl(data.featuredYoutubeUrl) : "";
+    const showStream = !!embedSrc;
 
     if (showStream) {
 
-        iframe.src = data.featuredYoutubeUrl;
+        // Only reassign iframe.src when the embed target actually changes —
+        // re-setting it to the same value on every poll cycle (every 5s)
+        // restarts YouTube playback, which is why the stream kept stopping.
+        if (iframe.dataset.embedSrc !== embedSrc) {
+            iframe.src = embedSrc;
+            iframe.dataset.embedSrc = embedSrc;
+        }
+
         iframe.style.display = "block";
         ground.style.display = "none";
 
@@ -679,6 +708,8 @@ function loadData(data) {
 
         iframe.style.display = "none";
         ground.style.display = "none";
+        iframe.removeAttribute("src");
+        delete iframe.dataset.embedSrc;
 
     }
 
@@ -716,11 +747,11 @@ function loadData(data) {
         renderAnnouncements(data.announcements);
     }
 
-    const sponsorsKey = JSON.stringify(data.sponsors) + "|" + data.sponsorImageHeight;
+    const sponsorsKey = JSON.stringify(data.sponsors);
 
     if (sponsorsKey !== lastSponsorsKey) {
         lastSponsorsKey = sponsorsKey;
-        renderSponsors(data.sponsors, data.sponsorImageHeight);
+        renderSponsors(data.sponsors);
     }
 
 }
@@ -732,43 +763,44 @@ function loadData(data) {
 let lastAnnouncementsKey = null;
 let lastSponsorsKey = null;
 
-const MARQUEE_SPEED_PX_PER_SEC = 70;
-const MARQUEE_MIN_DURATION_SEC = 10;
+const NEWS_FADE_MS = 400;
+const NEWS_DEFAULT_DURATION_SEC = 7;
+
+let announcementSlideIndex = 0;
+let announcementSlideTimer = null;
 
 function renderAnnouncements(announcements) {
 
-    const track = document.getElementById("announcementTrack");
+    const text = document.getElementById("announcementSlideText");
 
-    track.textContent = "";
+    clearTimeout(announcementSlideTimer);
 
     if (!announcements || announcements.length === 0) {
-        track.style.animation = "none";
+        text.textContent = "";
         return;
     }
 
-    for (let copy = 0; copy < 2; copy++) {
+    if (announcementSlideIndex >= announcements.length) announcementSlideIndex = 0;
 
-        announcements.forEach((text) => {
+    const showSlide = () => {
 
-            const span = document.createElement("span");
-            span.textContent = text;
-            track.appendChild(span);
+        const message = announcements[announcementSlideIndex];
 
-            const separator = document.createElement("span");
-            separator.className = "marquee-separator";
-            separator.textContent = "•";
-            track.appendChild(separator);
+        text.style.opacity = 0;
 
-        });
+        setTimeout(() => {
+            text.textContent = message;
+            text.style.opacity = 1;
+        }, NEWS_FADE_MS);
 
-    }
+        announcementSlideTimer = setTimeout(() => {
+            announcementSlideIndex = (announcementSlideIndex + 1) % announcements.length;
+            showSlide();
+        }, NEWS_DEFAULT_DURATION_SEC * 1000);
 
-    track.style.animation = "";
+    };
 
-    const halfWidth = track.scrollWidth / 2;
-    const duration = Math.max(halfWidth / MARQUEE_SPEED_PX_PER_SEC, MARQUEE_MIN_DURATION_SEC);
-
-    track.style.animationDuration = `${duration}s`;
+    showSlide();
 
 }
 
@@ -782,7 +814,7 @@ const SPONSOR_DEFAULT_DURATION_SEC = 6;
 let sponsorSlideIndex = 0;
 let sponsorSlideTimer = null;
 
-function renderSponsors(sponsors, imageHeight) {
+function renderSponsors(sponsors) {
 
     const sponsorPanel = document.getElementById("sponsorPanel");
     const bottomPanels = document.getElementById("bottomPanels");
@@ -801,8 +833,6 @@ function renderSponsors(sponsors, imageHeight) {
 
     sponsorPanel.style.display = "flex";
     bottomPanels.style.gridTemplateColumns = "1fr 1fr";
-
-    img.style.height = `${imageHeight}px`;
 
     if (sponsorSlideIndex >= sponsors.length) sponsorSlideIndex = 0;
 
