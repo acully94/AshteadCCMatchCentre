@@ -376,6 +376,26 @@ FEATURED PANEL
 
 }
 
+/* HEADLINE (dynamic match-state summary) */
+
+.featured-headline{
+
+    margin-top:10px;
+
+    font-size:24px;
+
+    font-weight:700;
+
+    color:var(--accent);
+
+}
+
+.featured-headline:empty{
+
+    display:none;
+
+}
+
 /* SCORE AREA */
 
 .featured-footer{
@@ -387,6 +407,110 @@ FEATURED PANEL
     justify-content:space-between;
 
     align-items:flex-end;
+
+}
+
+.featured-meta-row{
+
+    display:flex;
+
+    gap:18px;
+
+    margin-top:8px;
+
+    font-size:20px;
+
+    color:var(--muted);
+
+}
+
+.featured-meta:empty{
+
+    display:none;
+
+}
+
+.both-scores-line{
+
+    margin-top:10px;
+
+    font-size:18px;
+
+    color:var(--muted);
+
+}
+
+.both-scores-line:empty{
+
+    display:none;
+
+}
+
+.partnership-line{
+
+    color:var(--accent);
+
+    font-size:18px;
+
+}
+
+.partnership-line:empty{
+
+    display:none;
+
+    margin-bottom:0;
+
+}
+
+.top-performers{
+
+    margin-top:6px;
+
+    font-size:18px;
+
+    color:var(--muted);
+
+}
+
+.top-performers:empty{
+
+    display:none;
+
+    margin-top:0;
+
+}
+
+/* Expanded detail layout when the featured match isn't being live
+streamed — the video area is hidden and the score/detail footer grows
+to fill the space instead. */
+
+.featured-panel.no-video .video-panel{
+
+    display:none;
+
+}
+
+.featured-panel.no-video .featured-footer{
+
+    flex:1;
+
+    align-items:flex-start;
+
+    margin-top:36px;
+
+}
+
+.featured-panel.no-video .featured-score{
+
+    font-size:140px;
+
+}
+
+.featured-panel.no-video .batting-card{
+
+    font-size:26px;
+
+    line-height:2;
 
 }
 
