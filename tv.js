@@ -115,7 +115,14 @@ const sampleData = {
             status: "",
             batterOne: "J Smith 82*",
             batterTwo: "T Brown 36*",
-            bowler: "A Jones 7-0-42-1"
+            bowler: "A Jones 7-0-42-1",
+            headline: "",
+            runRate: "",
+            chase: "",
+            bothScores: "",
+            partnership: "",
+            topBatter: "",
+            topBowler: ""
         },
 
         slot2: {
@@ -127,7 +134,14 @@ const sampleData = {
             status: "Need 88 from 96 balls",
             batterOne: "",
             batterTwo: "",
-            bowler: ""
+            bowler: "",
+            headline: "",
+            runRate: "",
+            chase: "",
+            bothScores: "",
+            partnership: "",
+            topBatter: "",
+            topBowler: ""
         },
 
         slot3: {
@@ -139,7 +153,14 @@ const sampleData = {
             status: "Leatherhead 58/2",
             batterOne: "",
             batterTwo: "",
-            bowler: ""
+            bowler: "",
+            headline: "",
+            runRate: "",
+            chase: "",
+            bothScores: "",
+            partnership: "",
+            topBatter: "",
+            topBowler: ""
         },
 
         slot4: {
@@ -151,7 +172,14 @@ const sampleData = {
             status: "Restart 15:20",
             batterOne: "",
             batterTwo: "",
-            bowler: ""
+            bowler: "",
+            headline: "",
+            runRate: "",
+            chase: "",
+            bothScores: "",
+            partnership: "",
+            topBatter: "",
+            topBowler: ""
         }
 
     },
@@ -299,13 +327,43 @@ function formatInningsScore(innings) {
 
 }
 
-function activeBatters(innings) {
+function activeBatterObjects(innings) {
 
     if (!innings || !Array.isArray(innings.BattingCard)) return [];
 
-    return innings.BattingCard
-        .filter((b) => !b.IsSummary && (b.IsFirstActive || b.IsSecondActive))
-        .map((b) => `${cleanPlayerName(b.PlayerName)} ${b.Runs}*`);
+    return innings.BattingCard.filter((b) => !b.IsSummary && (b.IsFirstActive || b.IsSecondActive));
+
+}
+
+function activeBatters(innings) {
+
+    return activeBatterObjects(innings).map((b) => `${cleanPlayerName(b.PlayerName)} ${b.Runs}*`);
+
+}
+
+// Cricket overs notation (e.g. "3.2") isn't decimal — the part after the
+// dot is balls (0-5), not tenths. Convert to a true decimal for rate maths.
+
+function oversToDecimal(oversStr) {
+
+    const n = parseFloat(oversStr);
+
+    if (isNaN(n)) return 0;
+
+    const whole = Math.trunc(n);
+    const balls = Math.round((n - whole) * 10);
+
+    return whole + (balls / 6);
+
+}
+
+function calcRunRate(innings) {
+
+    const decimalOvers = oversToDecimal(innings.TotalOvers);
+
+    if (!decimalOvers) return null;
+
+    return (innings.TotalRuns / decimalOvers).toFixed(2);
 
 }
 
@@ -317,12 +375,167 @@ function currentBowlerLine(innings) {
 
     if (!bowler) return "";
 
-    return `${cleanPlayerName(bowler.PlayerName)} ${bowler.Overs}-${bowler.Maidens}-${bowler.Runs}-${bowler.Wickets}`;
+    const figures = `${bowler.Overs}-${bowler.Maidens}-${bowler.Runs}-${bowler.Wickets}`;
+    const decimalOvers = oversToDecimal(bowler.Overs);
+    const economy = decimalOvers ? (bowler.Runs / decimalOvers).toFixed(2) : null;
+
+    return economy
+        ? `${cleanPlayerName(bowler.PlayerName)} ${figures} (econ ${economy})`
+        : `${cleanPlayerName(bowler.PlayerName)} ${figures}`;
+
+}
+
+// Sum of the two not-out batters currently at the crease. Close to, but not
+// exactly, the "true" partnership figure (which would also include extras
+// scored during the stretch) — no fall-of-wicket data is exposed by the
+// scorecard API to compute that exactly.
+
+function currentPartnership(innings) {
+
+    const active = activeBatterObjects(innings);
+
+    if (active.length !== 2) return null;
+
+    return active.reduce((sum, b) => sum + (b.Runs || 0), 0);
+
+}
+
+// Target/runs-needed when a second innings is under way. No ball-by-ball
+// or overs-limit data is exposed by the API, so this deliberately doesn't
+// attempt a "balls remaining" figure — just runs needed.
+
+function chaseContext(scorecard) {
+
+    const innings = scorecard.Innings;
+
+    if (!Array.isArray(innings) || innings.length < 2) return null;
+
+    const first = innings[0];
+    const second = innings[innings.length - 1];
+    const target = first.TotalRuns + 1;
+    const need = target - second.TotalRuns;
+
+    return { target, need: Math.max(need, 0) };
+
+}
+
+function bothInningsScoreLine(scorecard) {
+
+    const innings = scorecard.Innings;
+
+    if (!Array.isArray(innings) || innings.length < 2) return "";
+
+    return innings.map((inn) => `${inn.BattingTeamName} ${formatInningsScore(inn)}`).join("   ·   ");
+
+}
+
+function nextMilestoneMessage(active) {
+
+    for (const b of active) {
+
+        const nextMilestone = (Math.floor(b.Runs / 50) + 1) * 50;
+        const remaining = nextMilestone - b.Runs;
+
+        if (remaining > 0 && remaining <= 10) {
+            return `${cleanPlayerName(b.PlayerName)} ${remaining} away from ${nextMilestone}`;
+        }
+
+    }
+
+    return null;
+
+}
+
+// Best individual batting/bowling performance across the whole match —
+// used as a "headline stat" for in-progress and completed matches alike.
+
+function topBatterAcross(scorecard) {
+
+    let best = null;
+
+    (scorecard.Innings || []).forEach((innings) => {
+        (innings.BattingCard || []).forEach((b) => {
+            if (b.IsSummary) return;
+            if (!best || b.Runs > best.Runs) best = b;
+        });
+    });
+
+    if (!best) return "";
+
+    const notOut = best.IsFirstActive || best.IsSecondActive;
+
+    return `Top score: ${cleanPlayerName(best.PlayerName)} ${best.Runs}${notOut ? "*" : ""}`;
+
+}
+
+function topBowlerAcross(scorecard) {
+
+    let best = null;
+
+    (scorecard.Innings || []).forEach((innings) => {
+        (innings.BowlingCard || []).forEach((b) => {
+            if (!b.Wickets) return;
+            if (!best || b.Wickets > best.Wickets || (b.Wickets === best.Wickets && b.Runs < best.Runs)) best = b;
+        });
+    });
+
+    if (!best) return "";
+
+    return `Best bowling: ${cleanPlayerName(best.PlayerName)} ${best.Wickets}/${best.Runs}`;
+
+}
+
+// Builds a single dynamic, match-state-aware headline — this is what makes
+// the featured panel "smart" rather than just listing static fields.
+
+function buildHeadline(scorecard) {
+
+    const match = scorecard.Match;
+    const innings = scorecard.Innings || [];
+
+    if (!match) return "";
+
+    if (match.IsComplete) {
+        return match.MatchSituation || match.Result || "";
+    }
+
+    if (!match.HasMatchStarted) {
+        return "Starts shortly";
+    }
+
+    const current = innings[innings.length - 1];
+
+    if (!current) return match.MatchSituation || "";
+
+    if (innings.length >= 2) {
+
+        const chase = chaseContext(scorecard);
+
+        if (chase) {
+            return chase.need > 0
+                ? `Chasing ${chase.target} — need ${chase.need} more`
+                : "Target reached";
+        }
+
+    }
+
+    const active = activeBatterObjects(current);
+
+    const milestone = nextMilestoneMessage(active);
+    if (milestone) return milestone;
+
+    const partnership = currentPartnership(current);
+    if (partnership !== null && partnership >= 50) {
+        return `${active.map((b) => cleanPlayerName(b.PlayerName)).join(" & ")} — ${partnership} run partnership`;
+    }
+
+    return match.MatchSituation || "";
 
 }
 
 // Applies a live scorecard to a slot. `detailed` also fills batting/
-// bowling — used for whichever slot is currently featured.
+// bowling and the extended "smart summary" fields — used for whichever
+// slot is currently featured.
 
 function applyLiveScorecard(slot, scorecard, detailed) {
 
@@ -345,16 +558,31 @@ function applyLiveScorecard(slot, scorecard, detailed) {
 
         if (detailed) {
 
-            if (innings.TotalOvers) slot.overs = `${innings.TotalOvers} overs`;
+            slot.overs = innings.TotalOvers ? `${innings.TotalOvers} overs` : "";
+
+            const runRate = calcRunRate(innings);
+            slot.runRate = runRate ? `RR ${runRate}` : "";
 
             const batters = activeBatters(innings);
+            slot.batterOne = batters[0] || "";
+            slot.batterTwo = batters[1] || "";
 
-            if (batters[0]) slot.batterOne = batters[0];
-            if (batters[1]) slot.batterTwo = batters[1];
+            slot.bowler = currentBowlerLine(innings);
 
-            const bowler = currentBowlerLine(innings);
+            const partnership = currentPartnership(innings);
+            slot.partnership = partnership !== null ? `${partnership} run partnership` : "";
 
-            if (bowler) slot.bowler = bowler;
+            const chase = !match.IsComplete ? chaseContext(scorecard) : null;
+            slot.chase = chase ? `Target ${chase.target} · need ${chase.need}` : "";
+
+            slot.bothScores = bothInningsScoreLine(scorecard);
+
+            slot.headline = buildHeadline(scorecard);
+
+            const topBatter = topBatterAcross(scorecard);
+            const topBowler = topBowlerAcross(scorecard);
+            slot.topBatter = topBatter;
+            slot.topBowler = topBowler;
 
         }
 
@@ -416,9 +644,25 @@ function loadData(data) {
 
     document.getElementById("bowler").textContent = featured.bowler;
 
+    document.getElementById("featuredHeadline").textContent = featured.headline || "";
+
+    document.getElementById("featuredRunRate").textContent = featured.runRate || "";
+
+    document.getElementById("featuredChase").textContent = featured.chase || "";
+
+    document.getElementById("bothScoresLine").textContent = featured.bothScores || "";
+
+    document.getElementById("partnershipLine").textContent = featured.partnership || "";
+
+    document.getElementById("topPerformers").textContent =
+        [featured.topBatter, featured.topBowler].filter(Boolean).join("   ·   ");
+
     // Live stream mode: the stream itself (e.g. Frogbox overlay) shows the
     // score, so hide our own score/batting overlay and just show the video.
+    // Otherwise, there's no video to show at all — no placeholder ground
+    // photo — the expanded scorecard detail fills that space instead.
 
+    const featuredPanel = document.querySelector(".featured-panel");
     const featuredFooter = document.querySelector(".featured-footer");
     const iframe = document.getElementById("youtubeFrame");
     const ground = document.getElementById("groundImage");
@@ -434,11 +678,12 @@ function loadData(data) {
     } else {
 
         iframe.style.display = "none";
-        ground.style.display = "block";
+        ground.style.display = "none";
 
     }
 
-    featuredFooter.style.display = data.featuredIsLiveStream ? "none" : "flex";
+    featuredPanel.classList.toggle("no-video", !showStream);
+    featuredFooter.style.display = showStream ? "none" : "flex";
 
     // Sidebar: whichever slots are not currently featured, in order
 
