@@ -155,7 +155,8 @@ const sampleData = {
             bothScores: "",
             partnership: "",
             topBatter: "",
-            topBowler: ""
+            topBowler: "",
+            opponentCrestUrl: ""
         },
 
         slot2: {
@@ -174,7 +175,8 @@ const sampleData = {
             bothScores: "",
             partnership: "",
             topBatter: "",
-            topBowler: ""
+            topBowler: "",
+            opponentCrestUrl: ""
         },
 
         slot3: {
@@ -193,7 +195,8 @@ const sampleData = {
             bothScores: "",
             partnership: "",
             topBatter: "",
-            topBowler: ""
+            topBowler: "",
+            opponentCrestUrl: ""
         },
 
         slot4: {
@@ -212,7 +215,8 @@ const sampleData = {
             bothScores: "",
             partnership: "",
             topBatter: "",
-            topBowler: ""
+            topBowler: "",
+            opponentCrestUrl: ""
         }
 
     },
@@ -595,9 +599,33 @@ function buildHeadline(scorecard) {
 
 function applyLiveScorecard(slot, scorecard, detailed) {
 
+    // Team crests come from scraping the club's own results page, and are
+    // available regardless of which scoring method produced the rest of
+    // the data (or even if none did) — always apply this first.
+    const scraped = scorecard.Scraped;
+
+    if (scraped && scraped.opponentCrestUrl) {
+        slot.opponentCrestUrl = scraped.opponentCrestUrl;
+    }
+
     const match = scorecard.Match;
 
-    if (!match) return;
+    if (!match) {
+
+        // No NVPlay data at all — this match wasn't scored with
+        // Play-Cricket Scorer Pro (e.g. the iOS scoring app, or
+        // Frogbox), so fall back to whatever the results-page scrape
+        // found instead. No batting/bowling detail is available this
+        // way, just the final score and result.
+        if (scraped) {
+            if (scraped.opponentName) slot.opponent = scraped.opponentName;
+            if (scraped.ourScoreLine) slot.score = scraped.ourScoreLine;
+            if (scraped.result) slot.status = scraped.result;
+        }
+
+        return;
+
+    }
 
     const homeIsUs = isOurClub(match.Team1Club || match.Team1Name);
     const oppositionName = homeIsUs
@@ -768,6 +796,16 @@ function loadData(data) {
         document.getElementById(`match${num}Score`).textContent = slot.score;
 
         document.getElementById(`match${num}Status`).textContent = slot.status;
+
+        const oppLogo = document.getElementById(`oppLogo${num}`);
+
+        if (slot.opponentCrestUrl) {
+            oppLogo.src = slot.opponentCrestUrl;
+            oppLogo.alt = slot.opponent || "Opposition";
+            oppLogo.style.display = "block";
+        } else {
+            oppLogo.style.display = "none";
+        }
 
     });
 
