@@ -669,6 +669,32 @@ SCORE CARD
 
 }
 
+.team-logos{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    flex:none;
+
+}
+
+.team-logos .team-logo{
+
+    width:48px;
+
+    height:48px;
+
+}
+
+.opponent-logo{
+
+    display:none;
+
+}
+
 
 /* ---------------------------------------------------- */
 
