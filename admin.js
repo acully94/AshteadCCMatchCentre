@@ -4,10 +4,14 @@
 // ======================================================
 
 // ------------------------------------------------------
-// Password gate. This is a static site with no backend, so this is
-// only a soft deterrent (anyone with browser dev tools could bypass
-// it) — not real security. It's enough to stop casual club members
-// from wandering into settings, which is all it's meant to do.
+// Password gate. This is a static site with no backend server code of
+// its own, so this is only a soft deterrent (anyone with browser dev
+// tools could bypass it) — not real security. It's enough to stop
+// casual club members from wandering into settings, which is all it's
+// meant to do. The entered password doubles as the credential sent to
+// the Match Centre server when saving, so it's cached here (not just a
+// "true" flag) — that's why it's worth keeping this password separate
+// from anything sensitive elsewhere.
 // ------------------------------------------------------
 
 const AUTH_KEY = "matchCentreAdminAuth";
@@ -29,42 +33,71 @@ function unlockAdmin() {
     document.getElementById("adminPage").style.display = "block";
 }
 
-if (localStorage.getItem(AUTH_KEY) === "true") {
+function cachedAdminPassword() {
+    return localStorage.getItem(AUTH_KEY) || "";
+}
 
-    unlockAdmin();
+async function checkStoredAuth() {
 
-} else {
+    const stored = cachedAdminPassword();
 
-    document.getElementById("authForm").addEventListener("submit", async (event) => {
+    if (!stored) return false;
 
-        event.preventDefault();
+    const hash = await sha256Hex(stored);
 
-        const entered = document.getElementById("authPassword").value;
-        const hash = await sha256Hex(entered);
-
-        if (hash === AUTH_PASSWORD_HASH) {
-
-            localStorage.setItem(AUTH_KEY, "true");
-            unlockAdmin();
-
-        } else {
-
-            document.getElementById("authError").textContent = "Incorrect password.";
-            document.getElementById("authPassword").value = "";
-            document.getElementById("authPassword").focus();
-
-        }
-
-    });
+    return hash === AUTH_PASSWORD_HASH;
 
 }
+
+checkStoredAuth().then((ok) => {
+
+    if (ok) {
+
+        unlockAdmin();
+
+    } else {
+
+        document.getElementById("authForm").addEventListener("submit", async (event) => {
+
+            event.preventDefault();
+
+            const entered = document.getElementById("authPassword").value;
+            const hash = await sha256Hex(entered);
+
+            if (hash === AUTH_PASSWORD_HASH) {
+
+                localStorage.setItem(AUTH_KEY, entered);
+                unlockAdmin();
+
+            } else {
+
+                document.getElementById("authError").textContent = "Incorrect password.";
+                document.getElementById("authPassword").value = "";
+                document.getElementById("authPassword").focus();
+
+            }
+
+        });
+
+    }
+
+});
 
 document.getElementById("lockButton").addEventListener("click", () => {
     localStorage.removeItem(AUTH_KEY);
     location.reload();
 });
 
+// ------------------------------------------------------
+// Shared config lives on the Match Centre server (a Cloudflare Worker)
+// so this page and tv.html — on different devices — see the same
+// thing. CONFIG_KEY is only used as a local fallback cache in case the
+// server is briefly unreachable.
+// ------------------------------------------------------
+
 const CONFIG_KEY = "matchCentreConfig";
+const PROXY_OVERRIDE_KEY = "matchCentreProxyUrlOverride";
+const DEFAULT_PROXY_URL = "https://ashtead-scorecard-proxy.aculhane94.workers.dev";
 
 const SLOT_IDS = ["slot1", "slot2", "slot3", "slot4"];
 const SLOT_FIELDS = ["teamName", "opponent", "matchId", "fixtureType"];
@@ -73,17 +106,51 @@ const SPONSOR_DEFAULT_DURATION_SEC = 6;
 
 let sponsors = [];
 
-function loadConfig() {
+function normalizeProxyUrl(url) {
+
+    let trimmed = (url || "").trim();
+
+    if (!trimmed) return trimmed;
+
+    if (!/^https?:\/\//i.test(trimmed)) trimmed = `https://${trimmed}`;
+
+    return trimmed.replace(/\/+$/, "");
+
+}
+
+function resolveProxyUrl() {
+    const override = normalizeProxyUrl(localStorage.getItem(PROXY_OVERRIDE_KEY));
+    return override || DEFAULT_PROXY_URL;
+}
+
+async function loadConfig() {
 
     try {
 
-        const raw = localStorage.getItem(CONFIG_KEY);
+        const response = await fetch(`${resolveProxyUrl()}/config`);
 
-        return raw ? JSON.parse(raw) : null;
+        if (!response.ok) throw new Error(`Config endpoint returned ${response.status}`);
+
+        const config = await response.json();
+
+        if (config) {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+            return config;
+        }
 
     } catch (err) {
 
-        console.warn("Match Centre Admin: could not read saved config:", err);
+        console.warn("Match Centre Admin: could not reach shared config, using last-known copy:", err.message);
+
+    }
+
+    try {
+
+        const cached = localStorage.getItem(CONFIG_KEY);
+
+        return cached ? JSON.parse(cached) : null;
+
+    } catch (err) {
 
         return null;
 
@@ -102,9 +169,9 @@ function linesToList(text) {
 
 function fillForm(config) {
 
-    if (!config) return;
+    document.getElementById("scorecardProxyUrl").value = localStorage.getItem(PROXY_OVERRIDE_KEY) || "";
 
-    document.getElementById("scorecardProxyUrl").value = config.scorecardProxyUrl || "";
+    if (!config) return;
 
     document.getElementById("featuredSlotSelect").value = config.featuredSlotId || "slot1";
     document.getElementById("featuredIsLiveStream").checked = !!config.featuredIsLiveStream;
@@ -217,8 +284,6 @@ function readForm() {
 
     const config = {
 
-        scorecardProxyUrl: document.getElementById("scorecardProxyUrl").value.trim(),
-
         featuredSlotId: document.getElementById("featuredSlotSelect").value,
         featuredIsLiveStream: document.getElementById("featuredIsLiveStream").checked,
         featuredYoutubeUrl: document.getElementById("youtubeUrl").value.trim(),
@@ -252,21 +317,56 @@ function readForm() {
 
 }
 
-function saveConfig() {
+async function saveConfig() {
+
+    // The Match Centre server URL override is local to this browser only
+    // — it never goes to the server, it's what tells this browser (and
+    // tv.js) which server to talk to.
+    localStorage.setItem(PROXY_OVERRIDE_KEY, document.getElementById("scorecardProxyUrl").value.trim());
 
     const config = readForm();
-
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-
     const statusMessage = document.getElementById("statusMessage");
 
-    statusMessage.textContent = "Saved " + new Date().toLocaleTimeString("en-GB");
+    statusMessage.classList.remove("admin-status--ok", "admin-status--error");
+    statusMessage.textContent = "Saving…";
     statusMessage.classList.add("admin-status--ok");
 
-    setTimeout(() => statusMessage.classList.remove("admin-status--ok"), 2000);
+    try {
+
+        const response = await fetch(`${resolveProxyUrl()}/config`, {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+                "x-admin-password": cachedAdminPassword()
+            },
+            body: JSON.stringify(config)
+        });
+
+        if (!response.ok) {
+            const body = await response.json().catch(() => ({}));
+            throw new Error(body.error || `Server returned ${response.status}`);
+        }
+
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+
+        statusMessage.textContent = "Saved " + new Date().toLocaleTimeString("en-GB");
+
+    } catch (err) {
+
+        console.warn("Match Centre Admin: save failed:", err.message);
+
+        statusMessage.classList.remove("admin-status--ok");
+        statusMessage.classList.add("admin-status--error");
+        statusMessage.textContent = "Save failed — " + err.message;
+
+    }
+
+    setTimeout(() => {
+        statusMessage.classList.remove("admin-status--ok", "admin-status--error");
+    }, 4000);
 
 }
 
 document.getElementById("saveButton").addEventListener("click", saveConfig);
 
-fillForm(loadConfig());
+loadConfig().then(fillForm);
