@@ -1525,6 +1525,30 @@ ADMIN PASSWORD GATE
 
 }
 
+.admin-advanced summary{
+
+    font-family:'Oswald',sans-serif;
+
+    font-size:20px;
+
+    color:var(--accent);
+
+    cursor:pointer;
+
+}
+
+.admin-advanced[open] summary{
+
+    margin-bottom:6px;
+
+}
+
+.admin-advanced .admin-hint{
+
+    margin-top:16px;
+
+}
+
 .admin-hint{
 
     color:var(--muted);
@@ -1806,6 +1830,14 @@ ADMIN PASSWORD GATE
 }
 
 .admin-status--ok{
+
+    opacity:1;
+
+}
+
+.admin-status--error{
+
+    color:var(--red);
 
     opacity:1;
 
