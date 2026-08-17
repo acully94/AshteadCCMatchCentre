@@ -67,23 +67,56 @@ updateClock();
 // ------------------------------------------------------
 
 const CONFIG_KEY = "matchCentreConfig";
+const PROXY_OVERRIDE_KEY = "matchCentreProxyUrlOverride";
+const DEFAULT_PROXY_URL = "https://ashtead-scorecard-proxy.aculhane94.workers.dev";
 const REFRESH_INTERVAL_MS = 30000;
 const SCORECARD_POLL_INTERVAL_MS = 5000;
 const CLUB_NAME_MATCH = "ashtead";
 
 const SLOT_IDS = ["slot1", "slot2", "slot3", "slot4"];
 
-function getConfig() {
+function resolveProxyUrl() {
+    const override = normalizeProxyUrl(localStorage.getItem(PROXY_OVERRIDE_KEY));
+    return override || DEFAULT_PROXY_URL;
+}
+
+// The admin-configured settings live on the server now (in the same
+// Worker that proxies live scores) so that admin.html on one device and
+// tv.html on another both see the same thing, instead of each browser
+// having its own separate localStorage copy. Falls back to the last
+// good copy cached in this browser if the server is briefly unreachable,
+// so the TV doesn't blank out over a momentary network blip.
+
+async function getConfig() {
+
+    const proxyUrl = resolveProxyUrl();
 
     try {
 
-        const raw = localStorage.getItem(CONFIG_KEY);
+        const response = await fetch(`${proxyUrl}/config`);
 
-        return raw ? JSON.parse(raw) : null;
+        if (!response.ok) throw new Error(`Config endpoint returned ${response.status}`);
+
+        const config = await response.json();
+
+        if (config) {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+            return config;
+        }
 
     } catch (err) {
 
-        console.warn("Match Centre: could not read saved config:", err);
+        console.warn("Match Centre: could not reach shared config, using last-known copy:", err.message);
+
+    }
+
+    try {
+
+        const cached = localStorage.getItem(CONFIG_KEY);
+
+        return cached ? JSON.parse(cached) : null;
+
+    } catch (err) {
 
         return null;
 
@@ -269,13 +302,11 @@ function buildYoutubeEmbedUrl(input) {
 
 function buildLiveScorecardConfig(config) {
 
-    if (!config || !config.scorecardProxyUrl) return null;
-
     const slots = {};
 
     SLOT_IDS.forEach((slotId) => {
 
-        const slot = config.slots && config.slots[slotId];
+        const slot = config && config.slots && config.slots[slotId];
 
         if (slot && slot.matchId) slots[slotId] = slot.matchId;
 
@@ -283,20 +314,24 @@ function buildLiveScorecardConfig(config) {
 
     if (Object.keys(slots).length === 0) return null;
 
-    return { proxyUrl: normalizeProxyUrl(config.scorecardProxyUrl), slots };
+    return { proxyUrl: resolveProxyUrl(), slots };
 
 }
 
-// Tolerate a proxy URL pasted without "https://" — otherwise the browser
-// treats it as relative to the current page and the fetch silently fails.
+// Tolerate a proxy URL pasted without "https://" (otherwise the browser
+// treats it as relative to the current page and the fetch silently fails)
+// and strip any trailing slash (otherwise appending "/config" produces a
+// double slash that neither this code nor the Worker's routing matches).
 
 function normalizeProxyUrl(url) {
 
-    const trimmed = (url || "").trim();
+    let trimmed = (url || "").trim();
 
-    if (!trimmed || /^https?:\/\//i.test(trimmed)) return trimmed;
+    if (!trimmed) return trimmed;
 
-    return `https://${trimmed}`;
+    if (!/^https?:\/\//i.test(trimmed)) trimmed = `https://${trimmed}`;
+
+    return trimmed.replace(/\/+$/, "");
 
 }
 
@@ -868,7 +903,7 @@ let liveScorecardConfig = null;
 
 async function refreshAndRender() {
 
-    const config = getConfig();
+    const config = await getConfig();
 
     currentData = buildDataFromConfig(config);
     liveScorecardConfig = buildLiveScorecardConfig(config);
