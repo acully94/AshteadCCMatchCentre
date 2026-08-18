@@ -614,13 +614,18 @@ function applyLiveScorecard(slot, scorecard, detailed) {
 
         // No NVPlay data at all — this match wasn't scored with
         // Play-Cricket Scorer Pro (e.g. the iOS scoring app, or
-        // Frogbox), so fall back to whatever the results-page scrape
-        // found instead. No batting/bowling detail is available this
-        // way, just the final score and result.
+        // Frogbox). Play-Cricket's results page still gets a live score
+        // for these while the match is in progress (confirmed against a
+        // real live iOS-app-scored match), just no batting/bowling
+        // detail — so this fallback works for live and final alike.
         if (scraped) {
             if (scraped.opponentName) slot.opponent = scraped.opponentName;
             if (scraped.ourScoreLine) slot.score = scraped.ourScoreLine;
-            if (scraped.result) slot.status = scraped.result;
+            if (scraped.result) {
+                slot.status = scraped.result;
+            } else if (scraped.liveStatus) {
+                slot.status = scraped.liveStatus;
+            }
         }
 
         return;
