@@ -593,9 +593,10 @@ function buildHeadline(scorecard) {
 
 }
 
-// Applies a live scorecard to a slot. `detailed` also fills batting/
-// bowling and the extended "smart summary" fields — used for whichever
-// slot is currently featured.
+// Applies a live scorecard to a slot. Current batters/bowler fill in for
+// every slot; `detailed` additionally fills the extended "smart summary"
+// fields (headline, run rate, chase, partnership, top performers) — used
+// for whichever slot is currently featured, where there's room for them.
 
 function applyLiveScorecard(slot, scorecard, detailed) {
 
@@ -612,46 +613,25 @@ function applyLiveScorecard(slot, scorecard, detailed) {
 
     if (!match) {
 
-        // No NVPlay data at all — this match wasn't scored with
-        // Play-Cricket Scorer Pro (e.g. the iOS scoring app, or
-        // Frogbox). Play-Cricket's results page still gets a live score
-        // for these while the match is in progress (confirmed against a
-        // real live iOS-app-scored match), just no batting/bowling
-        // detail — so this fallback works for live and final alike.
+        // No Match data at all — this match wasn't scored with Play-Cricket
+        // Scorer Pro, and has no ResultsVault mapping either (the Worker
+        // already tries ResultsVault first and synthesizes a Match/Innings
+        // shape from it when available — see synthesizeMatchFromResultsVault
+        // — so reaching here means genuinely nothing more than a results-
+        // page score summary exists for this match, e.g. Frogbox-scored
+        // with no ResultsVault coverage). Play-Cricket's results page still
+        // gets a live score for these while the match is in progress
+        // (confirmed against a real live iOS-app-scored match), just no
+        // batting/bowling detail — so this fallback works for live and
+        // final alike.
         if (scraped) {
             if (scraped.opponentName) slot.opponent = scraped.opponentName;
             if (scraped.ourScoreLine) slot.score = scraped.ourScoreLine;
             if (scraped.result) {
-                // Match is over — clear any current batters/bowler still
-                // held from the last live poll, they're no longer relevant.
                 slot.status = scraped.result;
-                slot.batterOne = "";
-                slot.batterTwo = "";
-                slot.bowler = "";
             } else if (scraped.liveStatus) {
                 slot.status = scraped.liveStatus;
             }
-        }
-
-        // ResultsVault fills the batting/bowling detail gap for matches not
-        // scored with Play-Cricket Scorer Pro (the results-page scrape above
-        // only ever has a score summary, never per-player figures). Not
-        // every match has a ResultsVault mapping, so this is best-effort —
-        // when it's missing, whatever the last live poll found stays put.
-        const rv = scorecard.ResultsVaultDetail;
-
-        if (rv && !(scraped && scraped.result)) {
-
-            const batters = (rv.currentBatters || []).map((b) => `${cleanPlayerName(b.name)} ${b.runs}*`);
-
-            if (batters[0]) slot.batterOne = batters[0];
-            if (batters[1]) slot.batterTwo = batters[1];
-
-            if (rv.currentBowler) {
-                const bw = rv.currentBowler;
-                slot.bowler = `${cleanPlayerName(bw.name)} ${bw.overs}-${bw.maidens ?? 0}-${bw.runs}-${bw.wickets}`;
-            }
-
         }
 
         return;
@@ -671,18 +651,21 @@ function applyLiveScorecard(slot, scorecard, detailed) {
 
         slot.score = formatInningsScore(innings);
 
+        // Current batters/bowler show on every slot, not just the featured
+        // one — the extended "smart summary" fields below stay
+        // featured-only, there just isn't room for them on the side cards.
+        const batters = activeBatters(innings);
+        slot.batterOne = batters[0] || "";
+        slot.batterTwo = batters[1] || "";
+
+        slot.bowler = currentBowlerLine(innings);
+
         if (detailed) {
 
             slot.overs = innings.TotalOvers ? `${innings.TotalOvers} overs` : "";
 
             const runRate = calcRunRate(innings);
             slot.runRate = runRate ? `RR ${runRate}` : "";
-
-            const batters = activeBatters(innings);
-            slot.batterOne = batters[0] || "";
-            slot.batterTwo = batters[1] || "";
-
-            slot.bowler = currentBowlerLine(innings);
 
             const partnership = currentPartnership(innings);
             slot.partnership = partnership !== null ? `${partnership} run partnership` : "";
@@ -942,7 +925,7 @@ function renderSponsors(sponsors) {
     }
 
     sponsorPanel.style.display = "flex";
-    bottomPanels.style.gridTemplateColumns = "1fr 1fr";
+    bottomPanels.style.gridTemplateColumns = "260px 1fr";
 
     if (sponsorSlideIndex >= sponsors.length) sponsorSlideIndex = 0;
 
