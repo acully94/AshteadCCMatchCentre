@@ -622,10 +622,36 @@ function applyLiveScorecard(slot, scorecard, detailed) {
             if (scraped.opponentName) slot.opponent = scraped.opponentName;
             if (scraped.ourScoreLine) slot.score = scraped.ourScoreLine;
             if (scraped.result) {
+                // Match is over — clear any current batters/bowler still
+                // held from the last live poll, they're no longer relevant.
                 slot.status = scraped.result;
+                slot.batterOne = "";
+                slot.batterTwo = "";
+                slot.bowler = "";
             } else if (scraped.liveStatus) {
                 slot.status = scraped.liveStatus;
             }
+        }
+
+        // ResultsVault fills the batting/bowling detail gap for matches not
+        // scored with Play-Cricket Scorer Pro (the results-page scrape above
+        // only ever has a score summary, never per-player figures). Not
+        // every match has a ResultsVault mapping, so this is best-effort —
+        // when it's missing, whatever the last live poll found stays put.
+        const rv = scorecard.ResultsVaultDetail;
+
+        if (rv && !(scraped && scraped.result)) {
+
+            const batters = (rv.currentBatters || []).map((b) => `${cleanPlayerName(b.name)} ${b.runs}*`);
+
+            if (batters[0]) slot.batterOne = batters[0];
+            if (batters[1]) slot.batterTwo = batters[1];
+
+            if (rv.currentBowler) {
+                const bw = rv.currentBowler;
+                slot.bowler = `${cleanPlayerName(bw.name)} ${bw.overs}-${bw.maidens ?? 0}-${bw.runs}-${bw.wickets}`;
+            }
+
         }
 
         return;
@@ -801,6 +827,12 @@ function loadData(data) {
         document.getElementById(`match${num}Score`).textContent = slot.score;
 
         document.getElementById(`match${num}Status`).textContent = slot.status;
+
+        document.getElementById(`match${num}Batters`).textContent =
+            [slot.batterOne, slot.batterTwo].filter(Boolean).join(", ");
+
+        document.getElementById(`match${num}Bowler`).textContent =
+            slot.bowler ? `Bowling: ${slot.bowler}` : "";
 
         const oppLogo = document.getElementById(`oppLogo${num}`);
 
